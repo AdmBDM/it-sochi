@@ -36,12 +36,20 @@ BootstrapAsset::register($this);
 
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav ms-auto'],
-        'items' => [
-            ['label' => 'Главная', 'url' => ['/site/index']],
-            Yii::$app->user->isGuest
-                ? ['label' => 'Вход', 'url' => ['/site/login']]
-                : ['label' => 'Выход (' . Yii::$app->user->identity->username . ')', 'url' => ['/site/logout'], 'linkOptions' => ['data-method' => 'post']],
-        ],
+        'items' => Yii::$app->user->isGuest
+            ? [
+                ['label' => 'Вход', 'url' => ['/site/login']],
+            ]
+            : [
+                '<li class="nav-item">'
+                . Html::beginForm(['/site/logout'], 'post', ['class' => 'd-inline'])
+                . Html::submitButton(
+                    'Выход (' . Html::encode(Yii::$app->user->identity->username) . ')',
+                    ['class' => 'btn btn-link nav-link logout', 'style' => 'padding: 0']
+                )
+                . Html::endForm()
+                . '</li>',
+            ],
     ]);
 
     NavBar::end();

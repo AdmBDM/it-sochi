@@ -9,6 +9,7 @@ return [
     'webEmail' => 'dmitriy.belik@abs-group.ru',
     'webPhone' => '+7 93 777 808 33',
     'app_title' => 'it-Sochi',
+    'frontendUrl' => 'http://it-sochi/',
     'prefix_blocks_id' => 'block',
     'blocks' => [
 		'0' => [

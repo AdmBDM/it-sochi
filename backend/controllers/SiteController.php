@@ -102,6 +102,9 @@ class SiteController extends SochiMainController
         Yii::$app->user->logout();
 
 //        return $this->goHome();
-        return Yii::$app->getResponse()->redirect(Yii::$app->urlManager->hostInfo . '/');  // ������� �� frontend
+//        return Yii::$app->getResponse()->redirect(Yii::$app->urlManager->hostInfo . '/');  // ������� �� frontend
+
+//        return $this->redirect('http://it-sochi/'); // локальный адрес фронта
+        return $this->redirect(Yii::$app->params['frontendUrl'] ?? 'http://it-sochi/');
     }
 }
