@@ -16,9 +16,9 @@ use yii\web\Response;
 class SiteController extends SochiMainController
 {
     /**
-     * {@inheritdoc}
+     * @return array[]
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -45,9 +45,9 @@ class SiteController extends SochiMainController
     }
 
     /**
-     * {@inheritdoc}
+     * @return array[]
      */
-    public function actions()
+    public function actions(): array
     {
         return [
             'error' => [
@@ -61,7 +61,7 @@ class SiteController extends SochiMainController
      *
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
         return $this->render('index');
     }
@@ -71,7 +71,7 @@ class SiteController extends SochiMainController
      *
      * @return string|Response
      */
-    public function actionLogin()
+    public function actionLogin(): Response|string
     {
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
@@ -94,9 +94,10 @@ class SiteController extends SochiMainController
     /**
      * Logout action.
      *
-     * @return Response
+     * @return \yii\console\Response|Response
+     * @throws \yii\base\InvalidRouteException
      */
-    public function actionLogout()
+    public function actionLogout(): Response|\yii\console\Response
     {
         Yii::$app->user->logout();
 

@@ -33,6 +33,9 @@ class User extends ActiveRecord implements IdentityInterface
     const STATUS_DELETED = 0;
     const STATUS_INACTIVE = 9;
     const STATUS_ACTIVE = 10;
+    const ROLE_ADMIN = 'admin';
+    const ROLE_IT = 'it';
+    const ROLE_EMPLOYEE = 'employee';
 
     /**
      * @return string
@@ -263,7 +266,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === self::ROLE_ADMIN;
     }
 
     /**
@@ -271,7 +274,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function isIt(): bool
     {
-        return $this->role === 'it';
+        return $this->role === self::ROLE_IT;
     }
 
     /**
@@ -279,7 +282,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function isEmployee(): bool
     {
-        return $this->role === 'employee';
+        return $this->role === self::ROLE_EMPLOYEE;
     }
 
     /**
@@ -295,7 +298,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function canEdit(): bool
     {
-        return in_array($this->role, ['it', 'admin'], true);
+        return in_array($this->role, [self::ROLE_IT, self::ROLE_ADMIN], true);
     }
 
 }
