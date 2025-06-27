@@ -12,6 +12,9 @@ use yii\bootstrap5\BootstrapAsset;
 
 YiiAsset::register($this);
 BootstrapAsset::register($this);
+$this->registerCssFile('@web/css/site.css', [
+    'depends' => [YiiAsset::class],
+]);
 
 ?>
 <?php $this->beginPage() ?>
