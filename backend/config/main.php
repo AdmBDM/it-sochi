@@ -13,24 +13,39 @@ return [
     'bootstrap' => ['log'],
     'components' => [
         'request' => [
-			'csrfParam' => '_csrf-backend',
-			'baseUrl' => '/admin',
-		],
+            'csrfParam' => '_csrf-backend',
+            'baseUrl' => '/admin',
+            'csrfCookie' => [
+                'httpOnly' => true,
+                'path' => '/', // доступна и фронту, и бэку
+            ],
+        ],
         'user' => [
             'identityClass' => 'common\models\User',
             'enableAutoLogin' => true,
-            'loginUrl' => ['//site/login'], // <- ВАЖНО! с двумя слешами — обращение к frontend
-            'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],
+            'loginUrl' => ['//site/login'], // единая точка входа — frontend
+            'identityCookie' => [
+                'name' => '_identity',  // совпадает с frontend
+                'httpOnly' => true,
+                'path' => '/',          // доступна глобально
+            ],
         ],
         'session' => [
-			'name' => 'advanced-backend',
-			'cookieParams' => ['path' => '/'],
-		],
+            'name' => 'advanced-session', // единое имя сессии
+            'cookieParams' => [
+                'path' => '/',     // доступна глобально
+                'httpOnly' => true,
+            ],
+        ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
-            'targets' => [['class' => \yii\log\FileTarget::class, 'levels' => ['error', 'warning']]],
+            'targets' => [
+                ['class' => \yii\log\FileTarget::class, 'levels' => ['error', 'warning']],
+            ],
         ],
-        'errorHandler' => ['errorAction' => 'site/error'],
+        'errorHandler' => [
+            'errorAction' => 'site/error',
+        ],
         'urlManager' => [
             'class' => 'yii\web\UrlManager',
             'enablePrettyUrl' => true,
@@ -40,7 +55,6 @@ return [
                 '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
             ],
         ],
-        // Для генерации ссылок на frontend из backend
         'urlManagerFrontend' => [
             'class' => 'yii\web\UrlManager',
             'hostInfo' => 'http://it-sochi',

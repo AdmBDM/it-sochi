@@ -1,20 +1,16 @@
 <?php
+use yii\helpers\Html;
 
-/** @var yii\web\View $this */
-
-Yii::$app->name = Yii::$app->params['app_title'];
-$this->title = Yii::$app->name;
+$this->title = 'Главная страница портала';
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="site-index">
-    <div class="p-5 mb-4 bg-transparent rounded-3">
-        <div class="container-fluid py-5 text-center">
-            <h1 class="display-4">Общая информация ИТ</h1>
-            <p class="fs-5 fw-light">АБС-АВТО СОЧИ</p>
-        </div>
+    <div class="jumbotron text-center">
+        <h1><?= Html::encode($this->title) ?></h1>
+        <p class="lead">Добро пожаловать на портал IT-структуры.</p>
     </div>
 
     <div class="body-content">
-
-
+        <p>Это стартовая страница фронтенда. Здесь будет размещена общая информация.</p>
     </div>
 </div>

@@ -14,18 +14,37 @@ return [
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-frontend',
+            'csrfCookie' => [
+                'httpOnly' => true,
+                'path' => '/',         // кука CSRF доступна на всем домене
+            ],
         ],
         'user' => [
             'identityClass' => 'common\models\User',
             'enableAutoLogin' => true,
-            'identityCookie' => ['name' => '_identity-frontend', 'httpOnly' => true],
+            'identityCookie' => [
+                'name' => '_identity', // единое имя для frontend и backend
+                'httpOnly' => true,
+                'path' => '/',         // кука идентификации доступна на всем домене
+            ],
         ],
-        'session' => ['name' => 'advanced-frontend'],
+        'session' => [
+            'name' => 'advanced-session', // единое имя сессии для обеих частей
+            'cookieParams' => [
+                'path' => '/',          // кука сессии доступна на всем домене
+                'httpOnly' => true,
+                //'secure' => true,     // включить, если HTTPS
+            ],
+        ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
-            'targets' => [['class' => \yii\log\FileTarget::class, 'levels' => ['error', 'warning']]],
+            'targets' => [
+                ['class' => \yii\log\FileTarget::class, 'levels' => ['error', 'warning']],
+            ],
         ],
-        'errorHandler' => ['errorAction' => 'site/error'],
+        'errorHandler' => [
+            'errorAction' => 'site/error',
+        ],
         'urlManager' => [
             'class' => 'yii\web\UrlManager',
             'enablePrettyUrl' => true,
