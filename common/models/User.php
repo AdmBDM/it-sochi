@@ -257,4 +257,45 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return $this->hasMany(Movement::class, ['moved_by_user_id' => 'id']);
     }
+
+    /**
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIt(): bool
+    {
+        return $this->role === 'it';
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEmployee(): bool
+    {
+        return $this->role === 'employee';
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGuest(): bool
+    {
+        return Yii::$app->user->isGuest;
+    }
+
+    /**
+     * @return bool
+     */
+    public function canEdit(): bool
+    {
+        return in_array($this->role, ['it', 'admin'], true);
+    }
+
 }
