@@ -3,16 +3,17 @@
 namespace backend\controllers;
 
 use common\models\LoginForm;
+use common\controllers\SochiMainController;
 use Yii;
-use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use yii\web\Controller;
+use yii\filters\VerbFilter;
 use yii\web\Response;
 
 /**
  * Site controller
  */
-class SiteController extends Controller
+//class SiteController extends Controller
+class SiteController extends SochiMainController
 {
     /**
      * {@inheritdoc}
@@ -100,6 +101,6 @@ class SiteController extends Controller
         Yii::$app->user->logout();
 
 //        return $this->goHome();
-        return Yii::$app->getResponse()->redirect(Yii::$app->urlManager->hostInfo . '/');  // переход на frontend
+        return Yii::$app->getResponse()->redirect(Yii::$app->urlManager->hostInfo . '/');  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ frontend
     }
 }

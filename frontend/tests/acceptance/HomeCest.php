@@ -11,7 +11,6 @@ class HomeCest
     {
         $I->amOnRoute(Url::toRoute('/site/index'));
         $I->see('My Application');
-
         $I->seeLink('About');
         $I->click('About');
         $I->wait(2); // wait for page to be opened
