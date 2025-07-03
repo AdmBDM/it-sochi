@@ -4,12 +4,12 @@ namespace common\models\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\Department;
+use common\models\OrganizationBuilding;
 
 /**
- * DepartmentSearch represents the model behind the search form of `common\models\Department`.
+ * OrganizationBuildingSearch represents the model behind the search form of `common\models\OrganizationBuilding`.
  */
-class DepartmentSearch extends Department
+class OrganizationBuildingSearch extends OrganizationBuilding
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,8 @@ class DepartmentSearch extends Department
     public function rules()
     {
         return [
-            [['id'], 'integer'],
-            [['name', 'created_at', 'updated_at'], 'safe'],
+            [['id', 'organization_id', 'building_id'], 'integer'],
+            [['created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -41,7 +41,7 @@ class DepartmentSearch extends Department
      */
     public function search($params, $formName = null)
     {
-        $query = Department::find();
+        $query = OrganizationBuilding::find();
 
         // add conditions that should always apply here
 
@@ -60,11 +60,11 @@ class DepartmentSearch extends Department
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
+            'organization_id' => $this->organization_id,
+            'building_id' => $this->building_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
-
-        $query->andFilterWhere(['ilike', 'name', $this->name]);
 
         return $dataProvider;
     }

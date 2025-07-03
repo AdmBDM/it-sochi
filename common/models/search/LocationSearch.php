@@ -6,38 +6,67 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Location;
 
+/**
+ * LocationSearch represents the model behind the search form of `common\models\Location`.
+ */
 class LocationSearch extends Location
 {
     /**
-     * @return array[]
+     * {@inheritdoc}
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-            [['id', 'building_id', 'floor'], 'integer'],
-            [['room'], 'safe'],
+            [['id', 'building_id'], 'integer'],
+            [['floor', 'room', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
     /**
-     * @param $params
+     * {@inheritdoc}
+     */
+    public function scenarios()
+    {
+        // bypass scenarios() implementation in the parent class
+        return Model::scenarios();
+    }
+
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     * @param string|null $formName Form name to be used into `->load()` method.
      *
      * @return ActiveDataProvider
      */
-    public function search($params): ActiveDataProvider
+    public function search($params, $formName = null)
     {
         $query = Location::find();
 
-        $dataProvider = new ActiveDataProvider(['query' => $query]);
-        $this->load($params);
+        // add conditions that should always apply here
 
-        if (!$this->validate()) return $dataProvider;
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
 
+        $this->load($params, $formName);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
             'building_id' => $this->building_id,
-            'floor' => $this->floor,
-        ])->andFilterWhere(['ilike', 'room', $this->room]);
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ]);
+
+        $query->andFilterWhere(['ilike', 'floor', $this->floor])
+            ->andFilterWhere(['ilike', 'room', $this->room]);
 
         return $dataProvider;
     }

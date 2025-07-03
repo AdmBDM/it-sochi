@@ -4,12 +4,12 @@ namespace common\models\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\Department;
+use common\models\DeviceStatus;
 
 /**
- * DepartmentSearch represents the model behind the search form of `common\models\Department`.
+ * DeviceStatusSearch represents the model behind the search form of `common\models\DeviceStatus`.
  */
-class DepartmentSearch extends Department
+class DeviceStatusSearch extends DeviceStatus
 {
     /**
      * {@inheritdoc}
@@ -41,7 +41,7 @@ class DepartmentSearch extends Department
      */
     public function search($params, $formName = null)
     {
-        $query = Department::find();
+        $query = DeviceStatus::find();
 
         // add conditions that should always apply here
 
