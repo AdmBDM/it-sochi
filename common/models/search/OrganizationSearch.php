@@ -12,9 +12,9 @@ use common\models\Organization;
 class OrganizationSearch extends Organization
 {
     /**
-     * {@inheritdoc}
+     * @return array[]
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id'], 'integer'],

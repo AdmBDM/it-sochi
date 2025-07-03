@@ -12,9 +12,9 @@ use common\models\Building;
 class BuildingSearch extends Building
 {
     /**
-     * {@inheritdoc}
+     * @return array[]
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id'], 'integer'],

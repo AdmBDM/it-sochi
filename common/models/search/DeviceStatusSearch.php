@@ -12,9 +12,9 @@ use common\models\DeviceStatus;
 class DeviceStatusSearch extends DeviceStatus
 {
     /**
-     * {@inheritdoc}
+     * @return array[]
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id'], 'integer'],

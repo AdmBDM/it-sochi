@@ -12,9 +12,9 @@ use common\models\Location;
 class LocationSearch extends Location
 {
     /**
-     * {@inheritdoc}
+     * @return array[]
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'building_id'], 'integer'],

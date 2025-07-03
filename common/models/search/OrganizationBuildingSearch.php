@@ -12,9 +12,9 @@ use common\models\OrganizationBuilding;
 class OrganizationBuildingSearch extends OrganizationBuilding
 {
     /**
-     * {@inheritdoc}
+     * @return array[]
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'organization_id', 'building_id'], 'integer'],

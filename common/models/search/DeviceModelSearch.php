@@ -12,9 +12,9 @@ use common\models\DeviceModel;
 class DeviceModelSearch extends DeviceModel
 {
     /**
-     * {@inheritdoc}
+     * @return array[]
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'brand_id'], 'integer'],

@@ -12,9 +12,9 @@ use common\models\Department;
 class DepartmentSearch extends Department
 {
     /**
-     * {@inheritdoc}
+     * @return array[]
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id'], 'integer'],

@@ -12,9 +12,9 @@ use common\models\Workplace;
 class WorkplaceSearch extends Workplace
 {
     /**
-     * {@inheritdoc}
+     * @return array[]
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'employee_id', 'location_id', 'department_id'], 'integer'],

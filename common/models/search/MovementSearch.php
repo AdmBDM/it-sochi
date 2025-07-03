@@ -12,9 +12,9 @@ use common\models\Movement;
 class MovementSearch extends Movement
 {
     /**
-     * {@inheritdoc}
+     * @return array[]
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'device_id', 'from_workplace_id', 'to_workplace_id', 'moved_by_user_id'], 'integer'],
