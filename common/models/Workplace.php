@@ -90,7 +90,7 @@ class Workplace extends ActiveRecord
     /**
      * @return ActiveQuery
      */
-    public function getDevices(): ActiveQuery
+    public function getDevice(): ActiveQuery
     {
         return $this->hasMany(Device::class, ['workplace_id' => 'id']);
     }
@@ -110,4 +110,13 @@ class Workplace extends ActiveRecord
     {
         return $this->hasMany(Movement::class, ['to_workplace_id' => 'id']);
     }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getBuilding(): ActiveQuery
+    {
+        return $this->hasOne(Building::class, ['id' => 'building_id']);
+    }
+
 }

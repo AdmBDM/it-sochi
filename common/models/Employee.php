@@ -61,4 +61,14 @@ class Employee extends ActiveRecord
     {
         return $this->hasMany(Workplace::class, ['employee_id' => 'id']);
     }
+
+    /**
+     * @return string
+     */
+    public function getFullName(): string
+    {
+//        return $this->lastname . ' ' . $this->firstname;
+        return $this->full_name;
+    }
+
 }

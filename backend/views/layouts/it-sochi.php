@@ -37,22 +37,43 @@ $this->registerCssFile('@web/css/site.css', [
         'options' => ['class' => 'navbar navbar-expand-md navbar-dark bg-dark'],
     ]);
 
+//    echo Nav::widget([
+//        'options' => ['class' => 'navbar-nav ms-auto'],
+//        'items' => Yii::$app->user->isGuest
+//            ? [
+//                ['label' => 'Вход', 'url' => ['/site/login']],
+//            ]
+//            : [
+//                '<li class="nav-item">'
+//                . Html::beginForm(['/site/logout'], 'post', ['class' => 'd-inline'])
+//                . Html::submitButton(
+//                    'Выход (' . Html::encode(Yii::$app->user->identity->username) . ')',
+//                    ['class' => 'btn btn-link nav-link logout', 'style' => 'padding: 0']
+//                )
+//                . Html::endForm()
+//                . '</li>',
+//            ],
+//    ]);
     echo Nav::widget([
-        'options' => ['class' => 'navbar-nav ms-auto'],
-        'items' => Yii::$app->user->isGuest
-            ? [
-                ['label' => 'Вход', 'url' => ['/site/login']],
-            ]
-            : [
-                '<li class="nav-item">'
-                . Html::beginForm(['/site/logout'], 'post', ['class' => 'd-inline'])
+        'options' => ['class' => 'navbar-nav me-auto mb-2 mb-lg-0'],
+        'items' => [
+            ['label' => 'Панель управления', 'url' => ['/dashboard/index']],
+            ['label' => 'Организации', 'url' => ['/organization/index']],
+            ['label' => 'Отделы', 'url' => ['/department/index']],
+            ['label' => 'Сотрудники', 'url' => ['/employee/index']],
+            ['label' => 'Техника', 'url' => ['/devices/index']],
+            ['label' => 'Workplace', 'url' => ['/workplace/index']],
+            Yii::$app->user->isGuest
+                ? ['label' => 'Войти', 'url' => ['/site/login']]
+                : '<li class="nav-item">'
+                . Html::beginForm(['/site/logout'], 'post', ['class' => 'form-inline'])
                 . Html::submitButton(
-                    'Выход (' . Html::encode(Yii::$app->user->identity->username) . ')',
-                    ['class' => 'btn btn-link nav-link logout', 'style' => 'padding: 0']
+                    'Выйти (' . Yii::$app->user->identity->username . ')',
+                    ['class' => 'btn btn-link logout nav-link']
                 )
                 . Html::endForm()
-                . '</li>',
-            ],
+                . '</li>'
+        ],
     ]);
 
     NavBar::end();
