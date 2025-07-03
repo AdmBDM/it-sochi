@@ -14,9 +14,9 @@ use yii\filters\VerbFilter;
 class OrganizationController extends SochiMainController
 {
     /**
-     * @inheritDoc
+     * @return array
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return array_merge(
             parent::behaviors(),
