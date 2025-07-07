@@ -68,6 +68,8 @@ class Movement extends ActiveRecord
     }
 
     /**
+     * Связь с устройством (device)
+     *
      * @return ActiveQuery
      */
     public function getDevice(): ActiveQuery
@@ -76,6 +78,8 @@ class Movement extends ActiveRecord
     }
 
     /**
+     * Связь с рабочим местом, откуда перемещается техника (старое)
+     *
      * @return ActiveQuery
      */
     public function getFromWorkplace(): ActiveQuery
@@ -84,6 +88,8 @@ class Movement extends ActiveRecord
     }
 
     /**
+     * Связь с рабочим местом, куда перемещается техника (новое)
+     *
      * @return ActiveQuery
      */
     public function getToWorkplace(): ActiveQuery
@@ -98,4 +104,35 @@ class Movement extends ActiveRecord
     {
         return $this->hasOne(User::class, ['id' => 'moved_by_user_id']);
     }
+
+    /**
+     * Связь с сотрудником, инициировавшим движение
+     *
+     * @return ActiveQuery
+     */
+    public function getEmployee(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'moved_by_user_id']);
+    }
+
+    /**
+     * связь с организацией
+     *
+     * @return ActiveQuery
+     */
+    public function getOrganization(): ActiveQuery
+    {
+        return $this->hasOne(Organization::class, ['id' => 'organization_id']);
+    }
+
+    /**
+     * связь с отделом
+     *
+     * @return ActiveQuery
+     */
+    public function getDepartment(): ActiveQuery
+    {
+        return $this->hasOne(Department::class, ['id' => 'department_id']);
+    }
+
 }
