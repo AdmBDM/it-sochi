@@ -82,4 +82,15 @@ class DeviceModel extends ActiveRecord
     {
         return $this->hasMany(Device::class, ['device_model_id' => 'id']);
     }
+
+    /**
+     * @return string
+     */
+    public function getLabel(): string
+    {
+        $brand = $this->brand->name ?? '';
+        return "{$this->name} ({$brand})";
+    }
+
+
 }

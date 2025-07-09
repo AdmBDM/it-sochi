@@ -71,4 +71,14 @@ class Location extends ActiveRecord
     {
         return $this->hasMany(Workplace::class, ['location_id' => 'id']);
     }
+
+    /**
+     * @return string
+     */
+    public function getLabel(): string
+    {
+        $building = $this->building->name ?? '';
+        return "{$this->room} — {$this->floor} этаж, {$building}";
+    }
+
 }

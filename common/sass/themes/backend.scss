@@ -6,3 +6,9 @@ body {
   margin: 0;
   padding: 0;
 }
+
+.breadcrumb-item + .breadcrumb-item::before {
+  //content: "/";
+  content: " → ";
+  padding: 0 .5rem;
+}

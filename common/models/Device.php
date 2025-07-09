@@ -16,6 +16,7 @@ use yii\db\ActiveRecord;
  * @property string|null $note
  * @property string $created_at
  * @property string $updated_at
+ * @property string $name
  *
  * @property DeviceModel $deviceModel
  * @property DeviceStatus|null $deviceStatus
@@ -99,5 +100,18 @@ class Device extends ActiveRecord
     public function getMovements(): ActiveQuery
     {
         return $this->hasMany(Movement::class, ['device_id' => 'id']);
+    }
+
+    /**
+     * @return string
+     */
+    public function getLabel(): string
+    {
+        $type = $this->type->name ?? '—';
+        $brand = $this->brand->name ?? '';
+        $model = $this->model->name ?? '';
+        $serial = $this->serial_number ?? '';
+//        return $this->name ?? "{$type} {$brand} {$model} / SN: {$serial}";
+        return $this->name ?? "{$type} {$brand} {$model}";
     }
 }

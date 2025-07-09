@@ -14,6 +14,7 @@ use yii\db\Exception;
 use yii\db\StaleObjectException;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -22,6 +23,12 @@ use yii\web\Response;
  */
 class MovementController extends SochiMainController
 {
+    public array $devices = [];
+    public array $employees = [];
+    public array $workplaces = [];
+    public array $organizations = [];
+    public array $departments = [];
+
     /**
      * @return array
      */
@@ -38,6 +45,28 @@ class MovementController extends SochiMainController
                 ],
             ]
         );
+    }
+
+    /**
+     * @param $action
+     *
+     * @return bool
+     * @throws BadRequestHttpException
+     */
+    public function beforeAction($action): bool
+    {
+//        if (in_array($action->id, ['create', 'update', 'view'])) {
+            $this->devices = ArrayHelper::map(Device::find()->all(), 'id', 'name');
+            $this->employees = ArrayHelper::map(Employee::find()->all(), 'id', 'full_name');
+            $this->workplaces = ArrayHelper::map(Workplace::find()->all(), 'id', 'name');
+//            $this->organizations = ArrayHelper::map(Organization::find()->all(), 'id', 'name');
+//            $this->departments = ArrayHelper::map(Department::find()->all(), 'id', 'name');
+//        }
+        $this->view->params['devices'] = Device::find()->select(['name'])->indexBy('id')->column();
+        $this->view->params['employees'] = Employee::find()->select(['full_name'])->indexBy('id')->column();
+        $this->view->params['workplaces'] = Workplace::find()->select(['name'])->indexBy('id')->column();
+
+        return parent::beforeAction($action);
     }
 
     /**
@@ -68,6 +97,12 @@ class MovementController extends SochiMainController
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
+//            'devices' => $this->devices,
+//            'employees' => $this->employees,
+//            'workplaces' => $this->workplaces,
+            'devices' => Device::getList(),
+            'employees' => Employee::getList(),
+            'workplaces' => Workplace::getList(),
         ]);
     }
 
@@ -82,11 +117,11 @@ class MovementController extends SochiMainController
     {
         $model = new Movement();
 
-        $devices = ArrayHelper::map(Device::find()->all(), 'id', 'name'); // или другое поле
-        $employees = ArrayHelper::map(Employee::find()->all(), 'id', 'fullname');
-        $workplaces = ArrayHelper::map(Workplace::find()->all(), 'id', 'label');
-        $organizations = ArrayHelper::map(Organization::find()->all(), 'id', 'name');
-        $departments = ArrayHelper::map(Department::find()->all(), 'id', 'name');
+//        $devices = ArrayHelper::map(Device::find()->all(), 'id', 'name'); // или другое поле
+//        $employees = ArrayHelper::map(Employee::find()->all(), 'id', 'full_name');
+//        $workplaces = ArrayHelper::map(Workplace::find()->all(), 'id', 'label');
+//        $organizations = ArrayHelper::map(Organization::find()->all(), 'id', 'name');
+//        $departments = ArrayHelper::map(Department::find()->all(), 'id', 'name');
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
@@ -98,11 +133,11 @@ class MovementController extends SochiMainController
 
         return $this->render('create', [
             'model' => $model,
-            'devices' => $devices,
-            'employees' => $employees,
-            'workplaces' => $workplaces,
-            'organizations' => $organizations,
-            'departments' => $departments,
+            'devices' => $this->devices,
+            'employees' => $this->employees,
+            'workplaces' => $this->workplaces,
+//            'organizations' => $this->organizations,
+//            'departments' => $this->departments,
         ]);
     }
 
@@ -120,11 +155,11 @@ class MovementController extends SochiMainController
     {
         $model = $this->findModel($id);
 
-        $devices = ArrayHelper::map(Device::find()->all(), 'id', 'name'); // или другое поле
-        $employees = ArrayHelper::map(Employee::find()->all(), 'id', 'fullname');
-        $workplaces = ArrayHelper::map(Workplace::find()->all(), 'id', 'label');
-        $organizations = ArrayHelper::map(Organization::find()->all(), 'id', 'name');
-        $departments = ArrayHelper::map(Department::find()->all(), 'id', 'name');
+//        $devices = ArrayHelper::map(Device::find()->all(), 'id', 'name'); // или другое поле
+//        $employees = ArrayHelper::map(Employee::find()->all(), 'id', 'fullname');
+//        $workplaces = ArrayHelper::map(Workplace::find()->all(), 'id', 'label');
+//        $organizations = ArrayHelper::map(Organization::find()->all(), 'id', 'name');
+//        $departments = ArrayHelper::map(Department::find()->all(), 'id', 'name');
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
@@ -132,11 +167,11 @@ class MovementController extends SochiMainController
 
         return $this->render('update', [
             'model' => $model,
-            'devices' => $devices,
-            'employees' => $employees,
-            'workplaces' => $workplaces,
-            'organizations' => $organizations,
-            'departments' => $departments,
+            'devices' => $this->devices,
+            'employees' => $this->employees,
+            'workplaces' => $this->workplaces,
+//            'organizations' => $this->organizations,
+//            'departments' => $this->departments,
         ]);
     }
 

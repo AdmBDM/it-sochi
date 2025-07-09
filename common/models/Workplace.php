@@ -14,6 +14,7 @@ use yii\db\ActiveRecord;
  * @property string|null $note
  * @property string $created_at
  * @property string $updated_at
+ * @property string $name
  *
  * @property Employee|null $employee
  * @property Department|null $department
@@ -117,6 +118,15 @@ class Workplace extends ActiveRecord
     public function getBuilding(): ActiveQuery
     {
         return $this->hasOne(Building::class, ['id' => 'building_id']);
+    }
+
+    /**
+     * @return string
+     */
+    public function getLabel(): string
+    {
+        $building = $this->building->name ?? '';
+        return "{$this->room} — {$this->floor} этаж, {$building}";
     }
 
 }

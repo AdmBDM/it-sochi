@@ -3,12 +3,12 @@
 /** @var \yii\web\View $this */
 /** @var string $content */
 
-use yii\helpers\Html;
+use yii\bootstrap5\BootstrapAsset;
 use yii\bootstrap5\Nav;
 use yii\bootstrap5\NavBar;
-use yii\widgets\Breadcrumbs;
+use yii\helpers\Html;
 use yii\web\YiiAsset;
-use yii\bootstrap5\BootstrapAsset;
+use yii\widgets\Breadcrumbs;
 
 YiiAsset::register($this);
 BootstrapAsset::register($this);
@@ -80,7 +80,15 @@ $this->registerCssFile('@web/css/site.css', [
     ?>
 
     <div class="container mt-4">
-        <?= Breadcrumbs::widget(['links' => $this->params['breadcrumbs'] ?? []]) ?>
+<!--        --><?php //= Breadcrumbs::widget(['links' => $this->params['breadcrumbs'] ?? []]) ?>
+        <?= Breadcrumbs::widget([
+            'tag' => 'nav',
+            'options' => ['class' => 'breadcrumb'],
+            'itemTemplate' => "<li class=\"breadcrumb-item\">{link}</li>\n",
+            'activeItemTemplate' => "<li class=\"breadcrumb-item active\" aria-current=\"page\">{link}</li>\n",
+            'links' => $this->params['breadcrumbs'] ?? [],
+//            'separator' => ' → ', // ' &raquo; ' или ' / ', ' → '
+        ]) ?>
         <?= $content ?>
     </div>
 </div>
