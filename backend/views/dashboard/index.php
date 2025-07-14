@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <li><?= Html::a('Локации', ['/location']) ?></li>
         <li><?= Html::a('Здания', ['/building']) ?></li>
         <li><?= Html::a('Рабочие места', ['/workplace']) ?></li>
-        <li><?= Html::a('Устройства', ['/devices']) ?></li>
+        <li><?= Html::a('Устройства', ['/device']) ?></li>
         <li><?= Html::a('Сотрудники', ['/employee']) ?></li>
         <li><?= Html::a('Перемещения', ['/movement']) ?></li>
     </ul>

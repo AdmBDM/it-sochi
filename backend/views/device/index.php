@@ -27,9 +27,15 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+//            ['class' => 'yii\grid\SerialColumn'],
+            [
+                'class' => ActionColumn::class,
+                'urlCreator' => function ($action, Device $model, $key, $index, $column) {
+                    return Url::toRoute([$action, 'id' => $model->id]);
+                }
+            ],
 
-            'id',
+//            'id',
             'workplace_id',
             'type_id',
             'brand_id',
@@ -40,12 +46,6 @@ $this->params['breadcrumbs'][] = $this->title;
             //'comment:ntext',
             //'created_at',
             //'updated_at',
-            [
-                'class' => ActionColumn::className(),
-                'urlCreator' => function ($action, Device $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id]);
-                 }
-            ],
         ],
     ]); ?>
 

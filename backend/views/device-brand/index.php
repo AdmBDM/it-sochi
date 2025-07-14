@@ -28,17 +28,17 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
+            [
+                'class' => ActionColumn::className(),
+                'urlCreator' => function ($action, DeviceBrand $model, $key, $index, $column) {
+                    return Url::toRoute([$action, 'id' => $model->id]);
+                }
+            ],
 
             'id',
             'name',
             'created_at',
             'updated_at',
-            [
-                'class' => ActionColumn::className(),
-                'urlCreator' => function ($action, DeviceBrand $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id]);
-                 }
-            ],
         ],
     ]); ?>
 
