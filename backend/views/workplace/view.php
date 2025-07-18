@@ -6,23 +6,19 @@ use yii\widgets\DetailView;
 /** @var yii\web\View $this */
 /** @var common\models\Workplace $model */
 
-$this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Workplaces', 'url' => ['index']];
+$this->title = $model->name;
+$this->params['breadcrumbs'][] = ['label' => 'Рабочие места', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
-\yii\web\YiiAsset::register($this);
 ?>
 <div class="workplace-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id], [
+        <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
+            'data' => ['confirm' => 'Удалить это место?', 'method' => 'post'],
         ]) ?>
     </p>
 
@@ -30,9 +26,19 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
-            'employee_id',
-            'location_id',
-            'department_id',
+            'name',
+            [
+                'label' => 'Сотрудник',
+                'value' => $model->employee->lastname . ' ' . $model->employee->firstname ?? null,
+            ],
+            [
+                'label' => 'Подразделение',
+                'value' => $model->department->name ?? null,
+            ],
+            [
+                'label' => 'Локация',
+                'value' => $model->location->name ?? null,
+            ],
             'comment:ntext',
             'created_at',
             'updated_at',

@@ -2,11 +2,16 @@
 
 namespace backend\controllers;
 
+use Throwable;
+use Yii;
+use common\controllers\SochiMainController;
 use common\models\Workplace;
 use common\models\search\WorkplaceSearch;
-use common\controllers\SochiMainController;
-use yii\web\NotFoundHttpException;
+use yii\db\Exception;
+use yii\db\StaleObjectException;
 use yii\filters\VerbFilter;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 /**
  * WorkplaceController implements the CRUD actions for Workplace model.
@@ -14,46 +19,39 @@ use yii\filters\VerbFilter;
 class WorkplaceController extends SochiMainController
 {
     /**
-     * @return array
+     * @return array[]
      */
     public function behaviors(): array
     {
-        return array_merge(
-            parent::behaviors(),
-            [
-                'verbs' => [
-                    'class' => VerbFilter::className(),
-                    'actions' => [
-                        'delete' => ['POST'],
-                    ],
-                ],
-            ]
-        );
+        return [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => ['delete' => ['POST']],
+            ],
+        ];
     }
 
     /**
-     * Lists all Workplace models.
-     *
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
         $searchModel = new WorkplaceSearch();
-        $dataProvider = $searchModel->search($this->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
-     * Displays a single Workplace model.
-     * @param int $id ID
+     * @param $id
+     *
      * @return string
-     * @throws NotFoundHttpException if the model cannot be found
+     * @throws NotFoundHttpException
      */
-    public function actionView($id)
+    public function actionView($id): string
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
@@ -61,74 +59,66 @@ class WorkplaceController extends SochiMainController
     }
 
     /**
-     * Creates a new Workplace model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
+     * @return Response|string
+     * @throws Exception
      */
-    public function actionCreate()
+    public function actionCreate(): Response|string
     {
         $model = new Workplace();
 
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
-        } else {
-            $model->loadDefaultValues();
-        }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Updates an existing Workplace model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Рабочее место создано');
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+        return $this->render('create', ['model' => $model]);
     }
 
     /**
-     * Deletes an existing Workplace model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     *
+     * @return Response|string
+     * @throws NotFoundHttpException
+     * @throws Exception
      */
-    public function actionDelete($id)
+    public function actionUpdate($id): Response|string
+    {
+        $model = $this->findModel($id);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Изменения сохранены');
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        return $this->render('update', ['model' => $model]);
+    }
+
+    /**
+     * @param $id
+     *
+     * @return Response
+     * @throws NotFoundHttpException
+     * @throws Throwable
+     * @throws StaleObjectException
+     */
+    public function actionDelete($id): Response
     {
         $this->findModel($id)->delete();
-
+        Yii::$app->session->setFlash('info', 'Рабочее место удалено');
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the Workplace model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return Workplace the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     *
+     * @return Workplace
+     * @throws NotFoundHttpException
      */
-    protected function findModel($id)
+    protected function findModel($id): Workplace
     {
-        if (($model = Workplace::findOne(['id' => $id])) !== null) {
+        if (($model = Workplace::findOne($id)) !== null) {
             return $model;
         }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('Рабочее место не найдено.');
     }
 }

@@ -23,6 +23,10 @@ use yii\db\ActiveRecord;
  * @property Movement[] $movementsFrom
  * @property Movement[] $movementsTo
  */
+
+/**
+ * Workplace — модель для рабочего места.
+ */
 class Workplace extends ActiveRecord
 {
     /**
@@ -40,11 +44,13 @@ class Workplace extends ActiveRecord
     {
         return [
             [['employee_id', 'department_id', 'location_id'], 'integer'],
-            [['note'], 'string'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['comment'], 'string'],
+            [['name'], 'string', 'max' => 255],
+            [['employee_id', 'location_id', 'department_id', 'name'], 'required'],
             [['employee_id'], 'exist', 'targetClass' => Employee::class, 'targetAttribute' => 'id'],
             [['department_id'], 'exist', 'targetClass' => Department::class, 'targetAttribute' => 'id'],
             [['location_id'], 'exist', 'targetClass' => Location::class, 'targetAttribute' => 'id'],
+            [['created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -58,7 +64,8 @@ class Workplace extends ActiveRecord
             'employee_id' => 'Сотрудник',
             'department_id' => 'Отдел',
             'location_id' => 'Расположение',
-            'note' => 'Примечание',
+            'name' => 'Название',
+            'comment' => 'Комментарий',
             'created_at' => 'Создано',
             'updated_at' => 'Обновлено',
         ];

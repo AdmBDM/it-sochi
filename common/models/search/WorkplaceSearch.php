@@ -7,7 +7,7 @@ use yii\data\ActiveDataProvider;
 use common\models\Workplace;
 
 /**
- * WorkplaceSearch represents the model behind the search form of `common\models\Workplace`.
+ * WorkplaceSearch — поисковая модель для рабочего места.
  */
 class WorkplaceSearch extends Workplace
 {
@@ -18,14 +18,14 @@ class WorkplaceSearch extends Workplace
     {
         return [
             [['id', 'employee_id', 'location_id', 'department_id'], 'integer'],
-            [['comment', 'created_at', 'updated_at'], 'safe'],
+            [['comment', 'name', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function scenarios()
+    public function scenarios(): array
     {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
@@ -34,30 +34,27 @@ class WorkplaceSearch extends Workplace
     /**
      * Creates data provider instance with search query applied
      *
-     * @param array $params
-     * @param string|null $formName Form name to be used into `->load()` method.
+     * @param $params
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $formName = null)
+    public function search($params): ActiveDataProvider
     {
-        $query = Workplace::find();
-
-        // add conditions that should always apply here
+        $query = Workplace::find()
+            ->with(['employee', 'location', 'department']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['updated_at' => SORT_DESC]],
+            'pagination' => ['pageSize' => 20],
         ]);
 
-        $this->load($params, $formName);
+        $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 
-        // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
             'employee_id' => $this->employee_id,
@@ -67,7 +64,7 @@ class WorkplaceSearch extends Workplace
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['ilike', 'comment', $this->comment]);
+        $query->andFilterWhere(['ilike', 'name', $this->name]);
 
         return $dataProvider;
     }

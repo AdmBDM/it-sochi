@@ -1,5 +1,8 @@
 <?php
 
+use common\models\Department;
+use common\models\Employee;
+use common\models\Location;
 use common\models\Workplace;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
@@ -11,59 +14,41 @@ use yii\helpers\Url;
 /** @var common\models\search\WorkplaceSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Workplaces';
+$this->title = 'Рабочие места';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="workplace-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Create Workplace', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <p><?= Html::a('Добавить место', ['create'], ['class' => 'btn btn-success']) ?></p>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
+        'filterModel'  => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-            [
-                'class' => ActionColumn::class,
-                'urlCreator' => function ($action, Workplace $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id]);
-                }
-            ],
-
+//            ['class' => 'yii\grid\SerialColumn'],
+            ['class' => 'yii\grid\ActionColumn'],
             'id',
-            'employee_id',
+            'name',
             [
                 'attribute' => 'employee_id',
-                'value' => fn($model) => $model->employee->fullName ?? null,
-                'filter' => ArrayHelper::map(\common\models\Employee::find()->all(), 'id', 'fullName'),
-                'label' => 'Сотрудник',
+//                'value' => fn($model) => $model->employee->lastname . ' ' . $model->employee->firstname ?? null,
+                'value' => fn($model) => $model->employee->full_name ?? null,
+//                'filter' => ArrayHelper::map(Employee::find()->all(), 'id', fn($e) => $e->lastname . ' ' . $e->firstname),
+                'filter' => ArrayHelper::map(Employee::find()->all(), 'id', fn($e) => $e->full_name),
             ],
-            'location_id',
-            [
-                'attribute' => 'location_id',
-                'value' => fn($model) => $model->location->name ?? null,
-                'filter' => ArrayHelper::map(\common\models\Location::find()->all(), 'id', 'name'),
-                'label' => 'Локация',
-            ],
-            'department_id',
             [
                 'attribute' => 'department_id',
                 'value' => fn($model) => $model->department->name ?? null,
-                'filter' => ArrayHelper::map(\common\models\Department::find()->all(), 'id', 'name'),
-                'label' => 'Здание',
+                'filter' => ArrayHelper::map(Department::find()->all(), 'id', 'name'),
             ],
-            'comment:ntext',
-            //'created_at',
-            //'updated_at',
-
+            [
+                'attribute' => 'location_id',
+                'value' => fn($model) => $model->location->name ?? null,
+                'filter' => ArrayHelper::map(Location::find()->all(), 'id', 'name'),
+            ],
+            'updated_at',
         ],
     ]); ?>
-
 
 </div>
