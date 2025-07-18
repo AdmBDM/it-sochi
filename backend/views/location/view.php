@@ -6,23 +6,19 @@ use yii\widgets\DetailView;
 /** @var yii\web\View $this */
 /** @var common\models\Location $model */
 
-$this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Locations', 'url' => ['index']];
+$this->title = ($model->building->name ?? '') . " - {$model->floor} - {$model->room}";
+$this->params['breadcrumbs'][] = ['label' => 'Локации', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
-\yii\web\YiiAsset::register($this);
 ?>
-<div class="location-view">
 
+<div class="location-view">
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id], [
+        <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
+            'data' => ['confirm' => 'Удалить эту локацию?', 'method' => 'post'],
         ]) ?>
     </p>
 
@@ -30,12 +26,15 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
-            'building_id',
+//            'name',
+            [
+                'label' => 'Здание',
+                'value' => $model->building->name ?? null,
+            ],
             'floor',
             'room',
             'created_at',
             'updated_at',
         ],
     ]) ?>
-
 </div>

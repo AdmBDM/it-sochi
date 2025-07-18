@@ -81,4 +81,12 @@ class Location extends ActiveRecord
         return "{$this->room} — {$this->floor} этаж, {$building}";
     }
 
+    public function getName(): string
+    {
+        $base = $this->building->name ?? '—';
+        $floor = $this->floor !== null ? "эт.{$this->floor}" : '';
+        $room = $this->room ? " — {$this->room}" : '';
+        return trim("{$base} — {$floor}{$room}");
+    }
+
 }

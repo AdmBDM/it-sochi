@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'name',
             [
                 'label' => 'Сотрудник',
-                'value' => $model->employee->lastname . ' ' . $model->employee->firstname ?? null,
+                'value' => $model->employee->full_name ?? null,
             ],
             [
                 'label' => 'Подразделение',

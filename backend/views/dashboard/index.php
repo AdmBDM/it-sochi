@@ -10,13 +10,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <ul>
+        <li><?= Html::a('Сотрудники', ['/employee']) ?></li>
+        <li><?= Html::a('Здания', ['/building']) ?></li>
         <li><?= Html::a('Организации', ['/organization']) ?></li>
         <li><?= Html::a('Подразделения', ['/department']) ?></li>
         <li><?= Html::a('Локации', ['/location']) ?></li>
-        <li><?= Html::a('Здания', ['/building']) ?></li>
         <li><?= Html::a('Рабочие места', ['/workplace']) ?></li>
         <li><?= Html::a('Устройства', ['/device']) ?></li>
-        <li><?= Html::a('Сотрудники', ['/employee']) ?></li>
         <li><?= Html::a('Перемещения', ['/movement']) ?></li>
     </ul>
 </div>

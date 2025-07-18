@@ -28,8 +28,16 @@ use yii\widgets\ActiveForm;
         ['prompt' => 'Выберите подразделение']
     ) ?>
 
+<!--    --><?php //= $form->field($model, 'location_id')->dropDownList(
+//        ArrayHelper::map(Location::find()->all(), 'id', 'name'),
+//        ['prompt' => 'Выберите локацию']
+//    ) ?>
     <?= $form->field($model, 'location_id')->dropDownList(
-        ArrayHelper::map(Location::find()->all(), 'id', 'name'),
+        ArrayHelper::map(
+            Location::find()->with('building')->all(),
+            'id',
+            fn($loc) => $loc->building->name . ' — эт.' . $loc->floor . ($loc->room ? ' — ' . $loc->room : '')
+        ),
         ['prompt' => 'Выберите локацию']
     ) ?>
 

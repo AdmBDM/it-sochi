@@ -23,9 +23,9 @@ class LocationSearch extends Location
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function scenarios()
+    public function scenarios(): array
     {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
@@ -39,34 +39,30 @@ class LocationSearch extends Location
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $formName = null)
+    public function search($params): ActiveDataProvider
     {
-        $query = Location::find();
-
-        // add conditions that should always apply here
+        $query = Location::find()->with(['building']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['updated_at' => SORT_DESC]],
+            'pagination' => ['pageSize' => 20],
         ]);
 
-        $this->load($params, $formName);
+        $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 
-        // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
             'building_id' => $this->building_id,
+            'floor' => $this->floor,
+            'room' => $this->room,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
-
-        $query->andFilterWhere(['ilike', 'floor', $this->floor])
-            ->andFilterWhere(['ilike', 'room', $this->room]);
 
         return $dataProvider;
     }
