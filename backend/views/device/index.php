@@ -23,10 +23,16 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel'  => $searchModel,
         'columns' => [
 //            ['class' => 'yii\grid\SerialColumn'],
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'options' => ['style'=>'width: 90px; a:not(:last-child) {margin-right: 7px;}'],
+            ],
 
-            'id',
-            'name',
+//            'id',
+            [
+                'attribute' => 'name',
+                'options' => ['style'=>'width: 350px;'],
+            ],
             'serial_number',
             'inventory_number',
             [

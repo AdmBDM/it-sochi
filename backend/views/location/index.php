@@ -22,8 +22,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
 //            ['class' => 'yii\grid\SerialColumn'],
-            ['class' => 'yii\grid\ActionColumn'],
-            'id',
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'options' => ['style'=>'width: 90px; a:not(:last-child) {margin-right: 7px;}'],
+            ],
+
+//            'id',
             [
                 'attribute' => 'building_id',
                 'value' => fn($model) => $model->building->name ?? null,

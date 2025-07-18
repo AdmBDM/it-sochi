@@ -62,7 +62,7 @@ $this->registerCssFile('@web/css/site.css', [
     NavBar::end();
     ?>
 
-    <div class="container mt-4">
+    <div class="container mt-4" style="margin-top: auto">
         <?= Breadcrumbs::widget([
             'tag' => 'nav',
             'options' => ['class' => 'breadcrumb'],
