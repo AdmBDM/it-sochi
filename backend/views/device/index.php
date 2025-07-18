@@ -1,53 +1,46 @@
 <?php
 
-use common\models\Device;
-use yii\helpers\Html;
-use yii\helpers\Url;
-use yii\grid\ActionColumn;
+use common\models\DeviceModel;
+use common\models\DeviceStatus;
 use yii\grid\GridView;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 /** @var yii\web\View $this */
 /** @var common\models\search\DeviceSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Devices';
+$this->title = 'Учёт устройств';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="device-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Create Device', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <p><?= Html::a('Добавить устройство', ['create'], ['class' => 'btn btn-success']) ?></p>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
+        'filterModel'  => $searchModel,
         'columns' => [
 //            ['class' => 'yii\grid\SerialColumn'],
-            [
-                'class' => ActionColumn::class,
-                'urlCreator' => function ($action, Device $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id]);
-                }
-            ],
+            ['class' => 'yii\grid\ActionColumn'],
 
-//            'id',
-            'workplace_id',
-            'type_id',
-            'brand_id',
-            'model_id',
-            //'status_id',
-            //'serial_number',
-            //'inventory_number',
-            //'comment:ntext',
-            //'created_at',
-            //'updated_at',
+            'id',
+            'name',
+            'serial_number',
+            'inventory_number',
+            [
+                'attribute' => 'model_id',
+                'value' => fn($model) => $model->model->name ?? null,
+                'filter' => ArrayHelper::map(DeviceModel::find()->all(), 'id', 'name'),
+            ],
+            [
+                'attribute' => 'status_id',
+                'value' => fn($model) => $model->status->name ?? null,
+                'filter' => ArrayHelper::map(DeviceStatus::find()->all(), 'id', 'name'),
+            ],
+            'updated_at',
         ],
     ]); ?>
-
 
 </div>

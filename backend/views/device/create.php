@@ -5,16 +5,13 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var common\models\Device $model */
 
-$this->title = 'Create Device';
-$this->params['breadcrumbs'][] = ['label' => 'Devices', 'url' => ['index']];
+$this->title = 'Добавить устройство';
+$this->params['breadcrumbs'][] = ['label' => 'Устройства', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="device-create">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
-    <?= $this->render('_form', [
-        'model' => $model,
-    ]) ?>
+    <?= $this->render('_form', ['model' => $model]) ?>
 
 </div>

@@ -7,20 +7,22 @@ use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
+ * This is the model class for table "devices".
+ *
  * @property int $id
- * @property int $device_model_id
- * @property int|null $workplace_id
- * @property int|null $device_status_id
- * @property string|null $serial
- * @property string|null $inventory
- * @property string|null $note
+ * @property int $model_id
+ * @property int $status_id
+ * @property int $workplace_id
+ * @property string|null $serial_number
+ * @property string|null $inventory_number
+ * @property string|null $name
+ * @property string|null $comment
  * @property string $created_at
  * @property string $updated_at
- * @property string $name
  *
- * @property DeviceModel $deviceModel
- * @property DeviceStatus|null $deviceStatus
- * @property Workplace|null $workplace
+ * @property DeviceModel $model
+ * @property DeviceStatus $status
+ * @property Workplace $workplace
  * @property Movement[] $movements
  */
 class Device extends ActiveRecord
@@ -30,7 +32,7 @@ class Device extends ActiveRecord
      */
     public static function tableName(): string
     {
-        return '{{%devices}}';
+        return 'devices';
     }
 
     /**
@@ -39,16 +41,11 @@ class Device extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['device_model_id'], 'required'],
-            [['device_model_id', 'workplace_id', 'device_status_id'], 'integer'],
-            [['serial', 'inventory'], 'string', 'max' => 100],
-            [['note'], 'string'],
+            [['model_id', 'status_id', 'workplace_id'], 'required'],
+            [['model_id', 'status_id', 'workplace_id'], 'integer'],
+            [['comment'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
-            [['serial'], 'unique'],
-            [['inventory'], 'unique'],
-            [['device_model_id'], 'exist', 'targetClass' => DeviceModel::class, 'targetAttribute' => 'id'],
-            [['workplace_id'], 'exist', 'targetClass' => Workplace::class, 'targetAttribute' => 'id'],
-            [['device_status_id'], 'exist', 'targetClass' => DeviceStatus::class, 'targetAttribute' => 'id'],
+            [['serial_number', 'inventory_number', 'name'], 'string', 'max' => 255],
         ];
     }
 
@@ -59,12 +56,13 @@ class Device extends ActiveRecord
     {
         return [
             'id' => 'ID',
-            'device_model_id' => 'Модель устройства',
+            'model_id' => 'Модель устройства',
+            'status_id' => 'Статус',
             'workplace_id' => 'Рабочее место',
-            'device_status_id' => 'Статус',
-            'serial' => 'Серийный номер',
-            'inventory' => 'Инвентарный номер',
-            'note' => 'Примечание',
+            'serial_number' => 'Серийный номер',
+            'inventory_number' => 'Инвентарный номер',
+            'name' => 'Название',
+            'comment' => 'Комментарий',
             'created_at' => 'Создано',
             'updated_at' => 'Обновлено',
         ];
@@ -73,45 +71,57 @@ class Device extends ActiveRecord
     /**
      * @return ActiveQuery
      */
-    public function getDeviceModel(): ActiveQuery
+    public function getModel(): ActiveQuery
     {
-        return $this->hasOne(DeviceModel::class, ['id' => 'device_model_id']);
+        return $this->hasOne(DeviceModel::class, ['id' => 'model_id']);
     }
 
-    /**
-     * @return ActiveQuery
-     */
-    public function getDeviceStatus(): ActiveQuery
+    public function getStatus(): ActiveQuery
     {
-        return $this->hasOne(DeviceStatus::class, ['id' => 'device_status_id']);
+        return $this->hasOne(DeviceStatus::class, ['id' => 'status_id']);
     }
 
-    /**
-     * @return ActiveQuery
-     */
     public function getWorkplace(): ActiveQuery
     {
         return $this->hasOne(Workplace::class, ['id' => 'workplace_id']);
     }
 
-    /**
-     * @return ActiveQuery
-     */
     public function getMovements(): ActiveQuery
     {
         return $this->hasMany(Movement::class, ['device_id' => 'id']);
     }
 
+    // Дополнительные геттеры для вложенных данных
+
     /**
-     * @return string
+     * @return mixed|null
      */
-    public function getLabel(): string
+    public function getBrand(): mixed
     {
-        $type = $this->type->name ?? '—';
-        $brand = $this->brand->name ?? '';
-        $model = $this->model->name ?? '';
-        $serial = $this->serial_number ?? '';
-//        return $this->name ?? "{$type} {$brand} {$model} / SN: {$serial}";
-        return $this->name ?? "{$type} {$brand} {$model}";
+        return $this->model ? $this->model->brand : null;
+    }
+
+    /**
+     * @return mixed|null
+     */
+    public function getType(): mixed
+    {
+        return $this->model ? $this->model->type : null;
+    }
+
+    /**
+     * @return Employee|null
+     */
+    public function getEmployee(): ?Employee
+    {
+        return $this->workplace ? $this->workplace->employee : null;
+    }
+
+    /**
+     * @return Location|null
+     */
+    public function getLocation(): ?Location
+    {
+        return $this->workplace ? $this->workplace->location : null;
     }
 }

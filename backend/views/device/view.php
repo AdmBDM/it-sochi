@@ -6,23 +6,19 @@ use yii\widgets\DetailView;
 /** @var yii\web\View $this */
 /** @var common\models\Device $model */
 
-$this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Devices', 'url' => ['index']];
+$this->title = $model->name;
+$this->params['breadcrumbs'][] = ['label' => 'Устройства', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
-\yii\web\YiiAsset::register($this);
 ?>
 <div class="device-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id], [
+        <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
+            'data' => ['confirm' => 'Удалить это устройство?', 'method' => 'post'],
         ]) ?>
     </p>
 
@@ -30,13 +26,29 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
-            'workplace_id',
-            'type_id',
-            'brand_id',
-            'model_id',
-            'status_id',
+            'name',
             'serial_number',
             'inventory_number',
+            [
+                'label' => 'Модель',
+                'value' => $model->model->name,
+            ],
+            [
+                'label' => 'Бренд',
+                'value' => $model->brand->name ?? null,
+            ],
+            [
+                'label' => 'Тип',
+                'value' => $model->type->name ?? null,
+            ],
+            [
+                'label' => 'Рабочее место',
+                'value' => $model->workplace->name ?? null,
+            ],
+            [
+                'label' => 'Сотрудник',
+                'value' => $model->employee->fullName ?? null,
+            ],
             'comment:ntext',
             'created_at',
             'updated_at',

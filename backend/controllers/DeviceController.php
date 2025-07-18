@@ -2,58 +2,59 @@
 
 namespace backend\controllers;
 
+use Throwable;
+use Yii;
 use common\models\Device;
 use common\models\search\DeviceSearch;
-use common\controllers\SochiMainController;
+use yii\db\Exception;
+use yii\db\StaleObjectException;
+use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * DeviceController implements the CRUD actions for Device model.
  */
-class DeviceController extends SochiMainController
+class DeviceController extends Controller
 {
     /**
-     * @return array
+     * @return array[]
      */
     public function behaviors(): array
     {
-        return array_merge(
-            parent::behaviors(),
-            [
-                'verbs' => [
-                    'class' => VerbFilter::className(),
-                    'actions' => [
-                        'delete' => ['POST'],
-                    ],
+        return [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
                 ],
-            ]
-        );
+            ],
+            // Можно добавить AccessControl при необходимости
+        ];
     }
 
     /**
-     * Lists all Device models.
-     *
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
         $searchModel = new DeviceSearch();
-        $dataProvider = $searchModel->search($this->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
-     * Displays a single Device model.
-     * @param int $id ID
+     * @param $id
+     *
      * @return string
-     * @throws NotFoundHttpException if the model cannot be found
+     * @throws NotFoundHttpException
      */
-    public function actionView($id)
+    public function actionView($id): string
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
@@ -61,20 +62,16 @@ class DeviceController extends SochiMainController
     }
 
     /**
-     * Creates a new Device model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
+     * @return Response|string
+     * @throws Exception
      */
-    public function actionCreate()
+    public function actionCreate(): Response|string
     {
         $model = new Device();
 
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
-        } else {
-            $model->loadDefaultValues();
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Устройство добавлено');
+            return $this->redirect(['view', 'id' => $model->id]);
         }
 
         return $this->render('create', [
@@ -83,17 +80,18 @@ class DeviceController extends SochiMainController
     }
 
     /**
-     * Updates an existing Device model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     *
+     * @return Response|string
+     * @throws NotFoundHttpException
+     * @throws Exception
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id): Response|string
     {
         $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Изменения сохранены');
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -103,32 +101,32 @@ class DeviceController extends SochiMainController
     }
 
     /**
-     * Deletes an existing Device model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     *
+     * @return Response
+     * @throws NotFoundHttpException
+     * @throws Throwable
+     * @throws StaleObjectException
      */
-    public function actionDelete($id)
+    public function actionDelete($id): Response
     {
         $this->findModel($id)->delete();
-
+        Yii::$app->session->setFlash('info', 'Устройство удалено');
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the Device model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id ID
-     * @return Device the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     *
+     * @return Device
+     * @throws NotFoundHttpException
      */
-    protected function findModel($id)
+    protected function findModel($id): Device
     {
-        if (($model = Device::findOne(['id' => $id])) !== null) {
+        if (($model = Device::findOne($id)) !== null) {
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('Устройство не найдено.');
     }
 }

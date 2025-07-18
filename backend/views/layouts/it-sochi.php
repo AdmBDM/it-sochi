@@ -37,23 +37,6 @@ $this->registerCssFile('@web/css/site.css', [
         'options' => ['class' => 'navbar navbar-expand-md navbar-dark bg-dark'],
     ]);
 
-//    echo Nav::widget([
-//        'options' => ['class' => 'navbar-nav ms-auto'],
-//        'items' => Yii::$app->user->isGuest
-//            ? [
-//                ['label' => 'Вход', 'url' => ['/site/login']],
-//            ]
-//            : [
-//                '<li class="nav-item">'
-//                . Html::beginForm(['/site/logout'], 'post', ['class' => 'd-inline'])
-//                . Html::submitButton(
-//                    'Выход (' . Html::encode(Yii::$app->user->identity->username) . ')',
-//                    ['class' => 'btn btn-link nav-link logout', 'style' => 'padding: 0']
-//                )
-//                . Html::endForm()
-//                . '</li>',
-//            ],
-//    ]);
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav me-auto mb-2 mb-lg-0'],
         'items' => [
@@ -61,7 +44,7 @@ $this->registerCssFile('@web/css/site.css', [
             ['label' => 'Организации', 'url' => ['/organization/index']],
             ['label' => 'Отделы', 'url' => ['/department/index']],
             ['label' => 'Сотрудники', 'url' => ['/employee/index']],
-            ['label' => 'Техника', 'url' => ['/devices/index']],
+            ['label' => 'Техника', 'url' => ['/device/index']],
             ['label' => 'Workplace', 'url' => ['/workplace/index']],
             Yii::$app->user->isGuest
                 ? ['label' => 'Войти', 'url' => ['/site/login']]
@@ -80,14 +63,12 @@ $this->registerCssFile('@web/css/site.css', [
     ?>
 
     <div class="container mt-4">
-<!--        --><?php //= Breadcrumbs::widget(['links' => $this->params['breadcrumbs'] ?? []]) ?>
         <?= Breadcrumbs::widget([
             'tag' => 'nav',
             'options' => ['class' => 'breadcrumb'],
             'itemTemplate' => "<li class=\"breadcrumb-item\">{link}</li>\n",
             'activeItemTemplate' => "<li class=\"breadcrumb-item active\" aria-current=\"page\">{link}</li>\n",
             'links' => $this->params['breadcrumbs'] ?? [],
-//            'separator' => ' → ', // ' &raquo; ' или ' / ', ' → '
         ]) ?>
         <?= $content ?>
     </div>
