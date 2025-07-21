@@ -9,6 +9,7 @@ use yii\db\ActiveRecord;
 /**
  * @property int $id
  * @property string $name
+ * @property string $small
  * @property string|null $address
  * @property string $created_at
  * @property string $updated_at
@@ -35,7 +36,7 @@ class Building extends ActiveRecord
             [['name'], 'required'],
             [['address'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
-            [['name'], 'string', 'max' => 255],
+            [['name', 'small'], 'string', 'max' => 255],
             [['name'], 'unique'],
         ];
     }
@@ -48,6 +49,7 @@ class Building extends ActiveRecord
         return [
             'id' => 'ID',
             'name' => 'Название здания',
+            'small' => 'Кратко',
             'address' => 'Адрес',
             'created_at' => 'Создано',
             'updated_at' => 'Обновлено',

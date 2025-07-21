@@ -41,7 +41,7 @@ class EmployeeSearch extends Employee
      */
     public function search($params, $formName = null)
     {
-        $query = Employee::find();
+        $query = Employee::find()->orderBy(['full_name' => SORT_ASC]);
 
         // add conditions that should always apply here
 

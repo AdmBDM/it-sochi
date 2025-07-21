@@ -18,7 +18,7 @@ class BuildingSearch extends Building
     {
         return [
             [['id'], 'integer'],
-            [['name', 'address', 'created_at', 'updated_at'], 'safe'],
+            [['name', 'small', 'address', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -65,6 +65,7 @@ class BuildingSearch extends Building
         ]);
 
         $query->andFilterWhere(['ilike', 'name', $this->name])
+            ->andFilterWhere(['ilike', 'small', $this->small])
             ->andFilterWhere(['ilike', 'address', $this->address]);
 
         return $dataProvider;

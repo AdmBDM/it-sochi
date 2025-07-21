@@ -11,4 +11,12 @@ body {
   padding: 0 0.5rem;
 }
 
+.action-column {
+  width: 90px;
+}
+
+tbody tr td:first-child a:not(:last-of-type) {
+  margin-right: 5px;
+}
+
 /*# sourceMappingURL=site.css.map */

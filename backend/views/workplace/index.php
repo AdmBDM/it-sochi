@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
 //            ['class' => 'yii\grid\SerialColumn'],
             ['class' => 'yii\grid\ActionColumn'],
-            'id',
+//            'id',
             'name',
             [
                 'attribute' => 'employee_id',
@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => fn($model) => $model->location->name ?? null,
                 'filter' => ArrayHelper::map(Location::find()->all(), 'id', 'name'),
             ],
-            'updated_at',
+//            'updated_at',
         ],
     ]); ?>
 

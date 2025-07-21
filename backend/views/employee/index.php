@@ -35,12 +35,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
 
-            'id',
+//            'id',
             'full_name',
             'email:email',
             'phone',
-            'created_at',
-            //'updated_at',
+//            'created_at',
+            'updated_at',
         ],
     ]); ?>
 

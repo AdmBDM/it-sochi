@@ -9,6 +9,9 @@ use yii\db\ActiveRecord;
 /**
  * @property int $id
  * @property string $full_name
+ * @property string $first_name
+ * @property string $middle_name
+ * @property string $last_name
  * @property string|null $email
  * @property string|null $phone
  * @property string $created_at
@@ -33,7 +36,7 @@ class Employee extends ActiveRecord
     {
         return [
             [['full_name'], 'required'],
-            [['full_name', 'email'], 'string', 'max' => 255],
+            [['full_name', 'first_name', 'middle_name', 'last_name', 'email'], 'string', 'max' => 255],
             [['phone'], 'string', 'max' => 50],
             [['created_at', 'updated_at'], 'safe'],
         ];
@@ -47,6 +50,9 @@ class Employee extends ActiveRecord
         return [
             'id' => 'ID',
             'full_name' => 'ФИО',
+            'first_name' => 'Имя',
+            'middle_name' => 'Отчество',
+            'last_name' => 'Фамилия',
             'email' => 'Email',
             'phone' => 'Телефон',
             'created_at' => 'Создано',
