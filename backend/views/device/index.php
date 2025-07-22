@@ -1,7 +1,9 @@
 <?php
 
+use common\models\DeviceBrand;
 use common\models\DeviceModel;
 use common\models\DeviceStatus;
+use common\models\DeviceType;
 use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -29,23 +31,59 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
 //            'id',
+//            [
+//                'attribute' => 'name',
+//                'options' => ['style'=>'width: 350px;'],
+//            ],
             [
-                'attribute' => 'name',
-                'options' => ['style'=>'width: 350px;'],
+                'attribute' => 'deviceTypeName',
+                'label' => 'Тип',
+                'value' => function ($model) {
+                    return $model->model->type->name ?? null;
+                },
+                'filter' => ArrayHelper::map(
+                    DeviceType::find()->orderBy('name')->all(), 'name', 'name'
+                ),
+            ],
+            [
+                'attribute' => 'deviceBrandName',
+                'label' => 'Бренд',
+                'value' => function ($model) {
+                    return $model->model->brand->name ?? null;
+                },
+                'filter' => ArrayHelper::map(
+                    DeviceBrand::find()->orderBy('name')->all(), 'name', 'name'
+                ),
+            ],
+            [
+                'attribute' => 'deviceModelName',
+                'label' => 'Модель',
+                'value' => function ($model) {
+                    return $model->model->name ?? null;
+                },
+                'filter' => ArrayHelper::map(
+                    DeviceModel::find()->orderBy('name')->all(), 'name', 'name'
+                ),
             ],
             'serial_number',
             'inventory_number',
             [
-                'attribute' => 'model_id',
-                'value' => fn($model) => $model->model->name ?? null,
-                'filter' => ArrayHelper::map(DeviceModel::find()->all(), 'id', 'name'),
+                'attribute' => 'employeeFullName',
+                'label' => 'Сотрудник',
+                'value' => function ($model) {
+                    return $model->workplace->employee->famIO ?? null;
+                },
+                'filter' => Html::activeTextInput($searchModel, 'employeeFullName', [
+                    'class' => 'form-control',
+                    'placeholder' => 'ФИО'
+                ]),
             ],
             [
                 'attribute' => 'status_id',
                 'value' => fn($model) => $model->status->name ?? null,
                 'filter' => ArrayHelper::map(DeviceStatus::find()->all(), 'id', 'name'),
             ],
-            'updated_at',
+//            'updated_at',
         ],
     ]); ?>
 

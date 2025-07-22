@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var common\models\DeviceType $model */
 
-$this->title = 'Create Device Type';
+$this->title = 'Создать Device Type';
 $this->params['breadcrumbs'][] = ['label' => 'Device Types', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

@@ -31,7 +31,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'workplace_id')->dropDownList(
         ArrayHelper::map(Workplace::find()->with(['location', 'employee'])->all(), 'id', function($w) {
-            return "{$w->location->name} / {$w->employee->fullName}";
+            return "{$w->employee->fullName} / {$w->location->name}";
         }),
         ['prompt' => 'Выберите рабочее место']
     ) ?>

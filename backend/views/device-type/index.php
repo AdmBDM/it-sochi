@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Device Type', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Создать Device Type', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
@@ -27,18 +27,17 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            'id',
-            'name',
-            'created_at',
-            'updated_at',
+//            ['class' => 'yii\grid\SerialColumn'],
             [
                 'class' => ActionColumn::class,
                 'urlCreator' => function ($action, DeviceType $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
-                 }
+                }
             ],
+//            'id',
+            'name',
+//            'created_at',
+            'updated_at',
         ],
     ]); ?>
 

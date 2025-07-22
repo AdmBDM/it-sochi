@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
 //                'value' => fn($model) => $model->employee->lastname . ' ' . $model->employee->firstname ?? null,
                 'value' => fn($model) => $model->employee->full_name ?? null,
 //                'filter' => ArrayHelper::map(Employee::find()->all(), 'id', fn($e) => $e->lastname . ' ' . $e->firstname),
-                'filter' => ArrayHelper::map(Employee::find()->all(), 'id', fn($e) => $e->full_name),
+                'filter' => ArrayHelper::map(Employee::find()->orderBy('full_name')->all(), 'id', fn($e) => $e->full_name),
             ],
             [
                 'attribute' => 'department_id',

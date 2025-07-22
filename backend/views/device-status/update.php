@@ -5,10 +5,10 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var common\models\DeviceStatus $model */
 
-$this->title = 'Update Device Status: ' . $model->name;
+$this->title = 'Изменить Device Status: ' . $model->name;
 $this->params['breadcrumbs'][] = ['label' => 'Device Statuses', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Update';
+$this->params['breadcrumbs'][] = 'Изменить';
 ?>
 <div class="device-status-update">
 

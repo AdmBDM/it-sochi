@@ -10,6 +10,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <ul>
+        <h3>Основные таблицы</h3>
         <li><?= Html::a('Сотрудники', ['/employee']) ?></li>
         <li><?= Html::a('Здания', ['/building']) ?></li>
         <li><?= Html::a('Организации', ['/organization']) ?></li>
@@ -18,5 +19,11 @@ $this->params['breadcrumbs'][] = $this->title;
         <li><?= Html::a('Рабочие места', ['/workplace']) ?></li>
         <li><?= Html::a('Устройства', ['/device']) ?></li>
         <li><?= Html::a('Перемещения', ['/movement']) ?></li>
+        <hr>
+        <h3>Справочники</h3>
+        <li><?= Html::a('Типы оборудования', ['/device-type']) ?></li>
+        <li><?= Html::a('Бренды', ['/device-brand']) ?></li>
+        <li><?= Html::a('Модели', ['/device-model']) ?></li>
+
     </ul>
 </div>

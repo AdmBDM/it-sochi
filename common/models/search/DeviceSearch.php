@@ -11,6 +11,11 @@ use common\models\Device;
  */
 class DeviceSearch extends Device
 {
+    public $deviceTypeName;
+    public $deviceBrandName;
+    public $deviceModelName;
+    public $employeeFullName;
+
     /**
      * @return array[]
      */
@@ -18,7 +23,20 @@ class DeviceSearch extends Device
     {
         return [
             [['id', 'model_id', 'status_id', 'workplace_id'], 'integer'],
-            [['serial_number', 'inventory_number', 'name', 'created_at', 'updated_at'], 'safe'],
+            [
+                [
+                    'serial_number',
+                    'inventory_number',
+                    'name',
+                    'created_at',
+                    'updated_at',
+                    'deviceTypeName',
+                    'deviceBrandName',
+                    'deviceModelName',
+                    'employeeFullName'
+                ],
+                'safe'
+            ],
         ];
     }
 
@@ -38,13 +56,41 @@ class DeviceSearch extends Device
     public function search($params): ActiveDataProvider
     {
         $query = Device::find()
-            ->with(['model.brand', 'model.type', 'status', 'workplace.location', 'workplace.employee']);
+            ->joinWith([
+                'model brand', // alias support
+                'model.type',
+                'workplace.employee'
+            ])
+            ->with([
+                'status',
+                'workplace.location'
+            ]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['updated_at' => SORT_DESC]],
             'pagination' => ['pageSize' => 20],
         ]);
+
+        $dataProvider->sort->attributes['deviceModelName'] = [
+            'asc' => ['device_models.name' => SORT_ASC],
+            'desc' => ['device_models.name' => SORT_DESC],
+        ];
+
+        $dataProvider->sort->attributes['deviceBrandName'] = [
+            'asc' => ['device_brands.name' => SORT_ASC],
+            'desc' => ['device_brands.name' => SORT_DESC],
+        ];
+
+        $dataProvider->sort->attributes['deviceTypeName'] = [
+            'asc' => ['device_types.name' => SORT_ASC],
+            'desc' => ['device_types.name' => SORT_DESC],
+        ];
+
+        $dataProvider->sort->attributes['employeeFullName'] = [
+            'asc' => ['employees.full_name' => SORT_ASC],
+            'desc' => ['employees.full_name' => SORT_DESC],
+        ];
 
         $this->load($params);
 
@@ -53,17 +99,22 @@ class DeviceSearch extends Device
         }
 
         $query->andFilterWhere([
-            'id' => $this->id,
-            'model_id' => $this->model_id,
-            'status_id' => $this->status_id,
-            'workplace_id' => $this->workplace_id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'devices.id' => $this->id,
+            'devices.model_id' => $this->model_id,
+            'devices.status_id' => $this->status_id,
+            'devices.workplace_id' => $this->workplace_id,
+            'devices.created_at' => $this->created_at,
+            'devices.updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['ilike', 'serial_number', $this->serial_number])
-            ->andFilterWhere(['ilike', 'inventory_number', $this->inventory_number])
-            ->andFilterWhere(['ilike', 'name', $this->name]);
+        $query
+            ->andFilterWhere(['ilike', 'devices.serial_number', $this->serial_number])
+            ->andFilterWhere(['ilike', 'devices.inventory_number', $this->inventory_number])
+            ->andFilterWhere(['ilike', 'devices.name', $this->name])
+            ->andFilterWhere(['ilike', 'device_models.name', $this->deviceModelName])
+            ->andFilterWhere(['ilike', 'device_brands.name', $this->deviceBrandName])
+            ->andFilterWhere(['ilike', 'device_types.name', $this->deviceTypeName])
+            ->andFilterWhere(['ilike', 'employees.full_name', $this->employeeFullName]);
 
         return $dataProvider;
     }

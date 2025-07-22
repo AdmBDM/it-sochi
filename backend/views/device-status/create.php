@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var common\models\DeviceStatus $model */
 
-$this->title = 'Create Device Status';
+$this->title = 'Создать Device Status';
 $this->params['breadcrumbs'][] = ['label' => 'Device Statuses', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

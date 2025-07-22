@@ -83,7 +83,7 @@ class Location extends ActiveRecord
 
     public function getName(): string
     {
-        $base = $this->building->name ?? '—';
+        $base = $this->building->small ?? '—';
         $floor = $this->floor !== null ? "эт.{$this->floor}" : '';
         $room = $this->room ? " — {$this->room}" : '';
         return trim("{$base} — {$floor}{$room}");

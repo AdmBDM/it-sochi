@@ -21,6 +21,8 @@ use yii\db\ActiveRecord;
  */
 class Employee extends ActiveRecord
 {
+    public string $fam_io;
+
     /**
      * @return string
      */
@@ -37,8 +39,9 @@ class Employee extends ActiveRecord
         return [
             [['full_name'], 'required'],
             [['full_name', 'first_name', 'middle_name', 'last_name', 'email'], 'string', 'max' => 255],
+//            [['fam_io'], 'string', 'max' => 255],
             [['phone'], 'string', 'max' => 50],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at', 'fam_io'], 'safe'],
         ];
     }
 
@@ -53,6 +56,7 @@ class Employee extends ActiveRecord
             'first_name' => 'Имя',
             'middle_name' => 'Отчество',
             'last_name' => 'Фамилия',
+            'fam_io' => 'Фамилия И.О.',
             'email' => 'Email',
             'phone' => 'Телефон',
             'created_at' => 'Создано',
@@ -73,8 +77,18 @@ class Employee extends ActiveRecord
      */
     public function getFullName(): string
     {
-//        return $this->lastname . ' ' . $this->firstname;
-        return $this->full_name;
+        return $this->last_name . ' ' . $this->first_name . ' ' . $this->middle_name;
+//        return $this->full_name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFamIO(): string
+    {
+        return ($this->last_name . ' '
+            . trim(' ' . ($this->first_name ? mb_substr($this->first_name, 0, 1) . '.' : ''))
+            . trim(' ' . ($this->middle_name ? mb_substr($this->middle_name, 0, 1) . '.' : '')));
     }
 
 }
