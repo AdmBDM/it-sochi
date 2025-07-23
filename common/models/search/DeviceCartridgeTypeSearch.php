@@ -2,14 +2,14 @@
 
 namespace common\models\search;
 
+use common\models\DeviceCartridgeType;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\DeviceModel;
 
 /**
- * DeviceModelSearch represents the model behind the search form of `common\models\DeviceModel`.
+ * DeviceCartridgeTypeSearch represents the model behind the search form of `common\models\DeviceCartridgeType`.
  */
-class DeviceModelSearch extends DeviceModel
+class DeviceCartridgeTypeSearch extends DeviceCartridgeType
 {
     /**
      * @return array[]
@@ -17,15 +17,16 @@ class DeviceModelSearch extends DeviceModel
     public function rules(): array
     {
         return [
-            [['id', 'brand_id', 'type_id'], 'integer'],
-            [['name', 'created_at', 'updated_at'], 'safe'],
+            [['id', 'device_id', 'cartridge_type_id'], 'integer'],
+            [['created_at', 'updated_at'], 'safe'],
+            [['is_active'], 'boolean'],
         ];
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function scenarios()
+    public function scenarios(): array
     {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
@@ -39,9 +40,9 @@ class DeviceModelSearch extends DeviceModel
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $formName = null)
+    public function search($params, $formName = null): ActiveDataProvider
     {
-        $query = DeviceModel::find();
+        $query = DeviceCartridgeType::find();
 
         // add conditions that should always apply here
 
@@ -60,15 +61,12 @@ class DeviceModelSearch extends DeviceModel
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'brand_id' => $this->brand_id,
-            'type_id' => $this->type_id,
+            'device_id' => $this->device_id,
+            'cartridge_type_id' => $this->cartridge_type_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'is_active' => $this->is_active,
         ]);
-
-        $query->andFilterWhere(['type_id' => $this->type_id]);
-        $query->andFilterWhere(['brand_id' => $this->brand_id]);
-        $query->andFilterWhere(['ilike', 'name', $this->name]);
 
         return $dataProvider;
     }

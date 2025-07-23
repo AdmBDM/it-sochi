@@ -2,14 +2,14 @@
 
 namespace common\models\search;
 
+use common\models\CartridgeTransfer;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\DeviceModel;
 
 /**
- * DeviceModelSearch represents the model behind the search form of `common\models\DeviceModel`.
+ * CartridgeTransferSearch represents the model behind the search form of `common\models\CartridgeTransfer`.
  */
-class DeviceModelSearch extends DeviceModel
+class CartridgeTransferSearch extends CartridgeTransfer
 {
     /**
      * @return array[]
@@ -17,15 +17,16 @@ class DeviceModelSearch extends DeviceModel
     public function rules(): array
     {
         return [
-            [['id', 'brand_id', 'type_id'], 'integer'],
-            [['name', 'created_at', 'updated_at'], 'safe'],
+            [['id'], 'integer'],
+            [['type', 'code', 'created_at', 'updated_at'], 'safe'],
+            [['is_active'], 'boolean'],
         ];
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function scenarios()
+    public function scenarios(): array
     {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
@@ -41,7 +42,7 @@ class DeviceModelSearch extends DeviceModel
      */
     public function search($params, $formName = null)
     {
-        $query = DeviceModel::find();
+        $query = CartridgeTransfer::find();
 
         // add conditions that should always apply here
 
@@ -60,15 +61,13 @@ class DeviceModelSearch extends DeviceModel
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'brand_id' => $this->brand_id,
-            'type_id' => $this->type_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'is_active' => $this->is_active,
         ]);
 
-        $query->andFilterWhere(['type_id' => $this->type_id]);
-        $query->andFilterWhere(['brand_id' => $this->brand_id]);
-        $query->andFilterWhere(['ilike', 'name', $this->name]);
+        $query->andFilterWhere(['ilike', 'type', $this->type])
+            ->andFilterWhere(['ilike', 'code', $this->code]);
 
         return $dataProvider;
     }

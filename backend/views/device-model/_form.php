@@ -1,6 +1,7 @@
 <?php
 
 use common\models\DeviceBrand;
+use common\models\DeviceType;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -13,6 +14,13 @@ use yii\widgets\ActiveForm;
 <div class="device-model-form">
 
     <?php $form = ActiveForm::begin(); ?>
+
+    <?= $form->field($model, 'type_id')->dropDownList(
+        ArrayHelper::map(
+            DeviceType::find()->orderBy('name')->all(), 'id', 'name'
+        ),
+        ['prompt' => 'Выберите тип...']
+    ) ?>
 
     <?= $form->field($model, 'brand_id')->dropDownList(
         ArrayHelper::map(

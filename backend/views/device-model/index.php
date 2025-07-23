@@ -2,6 +2,7 @@
 
 use common\models\DeviceBrand;
 use common\models\DeviceModel;
+use common\models\DeviceType;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -38,6 +39,16 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
 //            'id',
+            [
+                'attribute' => 'type_id',
+                'label' => 'Тип',
+                'value' => function ($model) {
+                    return $model->type->name ?? null;
+                },
+                'filter' => ArrayHelper::map(
+                    DeviceType::find()->orderBy('name')->all(), 'id', 'name'
+                ),
+            ],
 //            'brand_id',
             [
                 'attribute' => 'brand_id',

@@ -37,10 +37,10 @@ class DeviceModel extends ActiveRecord
             [['brand_id', 'type_id', 'name'], 'required'],
             [['brand_id', 'type_id'], 'integer'],
             [['name'], 'string', 'max' => 100],
-            [['name'], 'unique'],
             [['created_at', 'updated_at'], 'safe'],
             [['brand_id'], 'exist', 'targetClass' => DeviceBrand::class, 'targetAttribute' => 'id'],
             [['type_id'], 'exist', 'targetClass' => DeviceType::class, 'targetAttribute' => 'id'],
+            [['type_id', 'name'], 'unique', 'targetAttribute' => ['type_id', 'name'], 'message' => 'Такое сочетание типа и названия уже существует.'],
         ];
     }
 
