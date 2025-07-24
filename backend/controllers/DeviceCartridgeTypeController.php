@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use common\controllers\SochiMainController;
 use common\models\DeviceCartridgeType;
 use common\models\search\DeviceCartridgeTypeSearch;
 use Throwable;
@@ -15,7 +16,7 @@ use yii\web\Response;
 /**
  * DeviceCartridgeTypeController implements the CRUD actions for DeviceCartridgeType model.
  */
-class DeviceCartridgeTypeController extends Controller
+class DeviceCartridgeTypeController extends SochiMainController
 {
     /**
      * @return array

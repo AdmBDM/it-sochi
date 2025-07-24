@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use common\controllers\SochiMainController;
 use common\models\CartridgeType;
 use common\models\search\CartridgeTypeSearch;
 use Throwable;
@@ -15,7 +16,7 @@ use yii\web\Response;
 /**
  * CartridgeTypeController implements the CRUD actions for CartridgeType model.
  */
-class CartridgeTypeController extends Controller
+class CartridgeTypeController extends SochiMainController
 {
     /**
      * @return array
@@ -73,6 +74,7 @@ class CartridgeTypeController extends Controller
     public function actionCreate(): Response|string
     {
         $model = new CartridgeType();
+//        $model->loadDefaultValues();
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {

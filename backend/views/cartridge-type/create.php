@@ -5,8 +5,8 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var common\models\CartridgeType $model */
 
-$this->title = 'Создать Cartridge Type';
-$this->params['breadcrumbs'][] = ['label' => 'Cartridge Types', 'url' => ['index']];
+$this->title = 'Создать тип картриджа';
+$this->params['breadcrumbs'][] = ['label' => 'Тип картриджа', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="cartridge-type-create">

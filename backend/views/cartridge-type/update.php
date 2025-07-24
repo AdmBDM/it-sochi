@@ -5,8 +5,8 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var common\models\CartridgeType $model */
 
-$this->title = 'Изменить Cartridge Type: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Cartridge Types', 'url' => ['index']];
+$this->title = 'Изменить тип картриджа: ' . $model->name;
+$this->params['breadcrumbs'][] = ['label' => 'Тип картриджа', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Изменить';
 ?>

@@ -19,6 +19,7 @@ class CartridgeTypeSearch extends CartridgeType
         return [
             [['id', 'initial_quantity'], 'integer'],
             [['name', 'color', 'created_at', 'updated_at'], 'safe'],
+            ['color', 'default', 'value' => null],
             [['is_active'], 'boolean'],
         ];
     }

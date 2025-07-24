@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use common\controllers\SochiMainController;
 use common\models\CartridgeTransfer;
 use common\models\search\CartridgeTransferSearch;
 use Throwable;
@@ -15,7 +16,7 @@ use yii\web\Response;
 /**
  * CartridgeTransferController implements the CRUD actions for CartridgeTransfer model.
  */
-class CartridgeTransferController extends Controller
+class CartridgeTransferController extends SochiMainController
 {
     /**
      * @return array

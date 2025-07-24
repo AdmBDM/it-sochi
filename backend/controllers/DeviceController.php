@@ -4,19 +4,20 @@ namespace backend\controllers;
 
 use Throwable;
 use Yii;
+use common\controllers\SochiMainController;
 use common\models\Device;
 use common\models\search\DeviceSearch;
 use yii\db\Exception;
 use yii\db\StaleObjectException;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
 
 /**
  * DeviceController implements the CRUD actions for Device model.
  */
-class DeviceController extends Controller
+class DeviceController extends SochiMainController
 {
     /**
      * @return array[]

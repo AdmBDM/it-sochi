@@ -40,6 +40,8 @@ class CartridgeType extends ActiveRecord
 //            [['name'], 'unique'],
             [['initial_quantity'], 'integer'],
             [['color'], 'string', 'max' => 50],
+            ['color', 'in', 'range' => array_keys(self::getColorList())],
+            ['color', 'default', 'value' => 'black'],
             [['name'], 'string', 'max' => 255],
             [['is_active'], 'boolean'],
             [['created_at', 'updated_at'], 'safe'],
@@ -86,4 +88,18 @@ class CartridgeType extends ActiveRecord
     {
         return $this->hasMany(CartridgeReplacement::class, ['new_cartridge_type_id' => 'id']);
     }
+
+    /**
+     * @return string[]
+     */
+    public static function getColorList(): array
+    {
+        return [
+            'black'   => 'Black',
+            'magenta' => 'Magenta',
+            'yellow'  => 'Yellow',
+            'blue'    => 'Blue',
+        ];
+    }
+
 }

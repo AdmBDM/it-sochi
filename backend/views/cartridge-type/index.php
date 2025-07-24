@@ -37,8 +37,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
 //            'id',
             'name',
-            'color',
-            'initial_quantity',
+//            'color',
+            [
+                'attribute' => 'color',
+                'value' => fn($model) => CartridgeType::getColorList()[$model->color] ?? $model->color,
+                'filter' => CartridgeType::getColorList(),
+            ],            'initial_quantity',
 //            'created_at',
             //'updated_at',
             //'is_active:boolean',

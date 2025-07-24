@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /** @var common\models\CartridgeType $model */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Cartridge Types', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Тип картриджа', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
