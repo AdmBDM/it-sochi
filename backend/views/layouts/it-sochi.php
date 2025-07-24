@@ -24,6 +24,7 @@ $this->registerCssFile('@web/css/site.css', [
     <meta charset="<?= Yii::$app->charset ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= Html::encode($this->title) ?></title>
+<!--    <link rel="icon" type="image/svg+xml" href="/favicon.svg">-->
     <?php $this->head() ?>
 </head>
 <body>

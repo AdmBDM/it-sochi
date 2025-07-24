@@ -37,12 +37,29 @@ class CartridgeType extends ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['name'], 'unique'],
+//            [['name'], 'unique'],
             [['initial_quantity'], 'integer'],
             [['color'], 'string', 'max' => 50],
             [['name'], 'string', 'max' => 255],
             [['is_active'], 'boolean'],
             [['created_at', 'updated_at'], 'safe'],
+            [['name', 'color'], 'unique', 'targetAttribute' => ['name', 'color'], 'message' => 'Такой картридж уже существует.'],
+        ];
+    }
+
+    /**
+     * @return string[]
+     */
+    public function attributeLabels(): array
+    {
+        return [
+            'id' => 'ID',
+            'name' => 'Модель',
+            'color' => 'Цвет',
+            'initial_quantity' => 'Начальное кол-во',
+            'is_active' => 'В работе',
+            'created_at' => 'Создано',
+            'updated_at' => 'Обновлено',
         ];
     }
 
