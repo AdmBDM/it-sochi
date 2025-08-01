@@ -11,6 +11,13 @@ return [
         'cache' => [
             'class' => \yii\caching\FileCache::class,
         ],
+        'assetManager' => [
+            'bundles' => [
+                'kartik\depdrop\DepDropAsset' => [
+                    'bsVersion' => '5.x',
+                ],
+            ],
+        ],
         // URL‑менеджер для backend (основной)
         'urlManager' => [
             'class' => 'yii\web\UrlManager',

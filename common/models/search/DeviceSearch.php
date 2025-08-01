@@ -57,7 +57,7 @@ class DeviceSearch extends Device
     {
         $query = Device::find()
             ->joinWith([
-                'model brand', // alias support
+                'model.brand', // alias support
                 'model.type',
                 'workplace.employee'
             ])

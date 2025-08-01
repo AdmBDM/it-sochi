@@ -15,10 +15,17 @@ use yii\widgets\ActiveForm;
 
 <div class="device-form">
 
+    <?php if ($model->hasErrors()): ?>
+        <div class="alert alert-danger">
+            <?= Html::errorSummary($model) ?>
+        </div>
+    <?php endif; ?>
+
+
     <?php $form = ActiveForm::begin(); ?>
 
     <?= $form->field($model, 'model_id')->dropDownList(
-        ArrayHelper::map(DeviceModel::find()->with(['brand', 'type'])->all(), 'id', function($m) {
+        ArrayHelper::map(DeviceModel::find()->with(['brand', 'type'])->orderBy('type_id, brand_id')->all(), 'id', function($m) {
             return "{$m->type->name} / {$m->brand->name} / {$m->name}";
         }),
         ['prompt' => 'Выберите модель']

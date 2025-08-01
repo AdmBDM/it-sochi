@@ -106,7 +106,7 @@ class Device extends ActiveRecord
      */
     public function getType(): mixed
     {
-        return $this->model ? $this->model->type : null;
+        return $this->model ? $this->type->name : null;
     }
 
     /**

@@ -31,10 +31,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
 //            'id',
-//            [
-//                'attribute' => 'name',
-//                'options' => ['style'=>'width: 350px;'],
-//            ],
             [
                 'attribute' => 'deviceTypeName',
                 'label' => 'Тип',
@@ -77,6 +73,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'form-control',
                     'placeholder' => 'ФИО'
                 ]),
+            ],
+            [
+                'attribute' => 'name',
+                'options' => ['style'=>'width: 150px;'],
             ],
             [
                 'attribute' => 'status_id',

@@ -5,6 +5,7 @@ namespace backend\controllers;
 use Throwable;
 use Yii;
 use common\controllers\SochiMainController;
+use common\models\Location;
 use common\models\Workplace;
 use common\models\search\WorkplaceSearch;
 use yii\db\Exception;
@@ -121,4 +122,35 @@ class WorkplaceController extends SochiMainController
         }
         throw new NotFoundHttpException('Рабочее место не найдено.');
     }
+
+    /**
+     * @return array
+     */
+    public function actionLocationList(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $departmentId = Yii::$app->request->post('department_id');
+        if (!$departmentId) {
+            return [];
+        }
+
+        $locations = Location::find()
+            ->where(['in', 'id', Workplace::find()
+                ->select('location_id')
+                ->where(['department_id' => $departmentId])
+                ->andWhere(['is not', 'location_id', null])
+            ])
+            ->with('building')
+            ->orderBy(['floor' => SORT_ASC])
+            ->all();
+
+        return array_map(function($loc) {
+            return [
+                'id' => $loc->id,
+                'name' => $loc->building->name . ' — эт.' . $loc->floor . ($loc->room ? ' — ' . $loc->room : '')
+            ];
+        }, $locations);
+    }
+
 }
