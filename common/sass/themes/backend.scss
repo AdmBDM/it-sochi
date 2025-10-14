@@ -1,4 +1,5 @@
-@import '../_variables';
+//@import '../_variables';
+@use '../variables' as *;
 
 body {
   font-family: $font-stack;
@@ -11,4 +12,29 @@ body {
   //content: "/";
   content: " → ";
   padding: 0 .5rem;
+}
+
+p.dev-info {
+  display: block;
+  margin-bottom: 0;
+
+  strong {
+    font-weight: bolder;
+    display: inline-block;
+    width: 100px;
+    text-align: right;
+    margin-right: $mar-pad;
+  }
+}
+
+.mb-2 {
+  margin-top: $mar-pad;
+  input {
+    margin-left: $mar-pad;
+    padding-left: $mar-pad;
+  }
+}
+
+.pagination li {
+  padding-left: 5px;
 }

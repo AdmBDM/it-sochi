@@ -1,6 +1,8 @@
 <?php
 
+use common\models\DeviceType;
 use common\models\Movement;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -32,15 +34,26 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+//            ['class' => 'yii\grid\SerialColumn'],
             [
                 'class' => ActionColumn::class,
+                'options' => ['style'=>'width: 90px; a:not(:last-child) {margin-right: 7px;}'],
                 'urlCreator' => function ($action, Movement $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
                 }
             ],
 
-            'id',
+//            'id',
+            [
+                'attribute' => 'deviceTypeName',
+                'label' => 'Тип',
+                'value' => function ($model) {
+                    return $model->model->type->name ?? null;
+                },
+                'filter' => ArrayHelper::map(
+                    DeviceType::find()->orderBy('name')->all(), 'name', 'name'
+                ),
+            ],
             'device_id',
             [
                 'attribute' => 'device_id',

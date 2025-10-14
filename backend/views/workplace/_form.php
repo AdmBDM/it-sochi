@@ -48,44 +48,6 @@ use yii\widgets\ActiveForm;
 </div>
 
 <?php
-//$url = Url::to(['/workplace/location-list']);
-//$csrfParam = Yii::$app->request->csrfParam;
-//$csrfToken = Yii::$app->request->csrfToken;
-//
-//$script = <<<JS
-//$('#workplace-department_id').on('change', function() {
-//    const deptId = $(this).val();
-//    const locSelect = $('#workplace-location_id');
-//
-//    locSelect.html('<option value="">Загрузка...</option>');
-//
-//    $.ajax({
-//        url: '$url',
-//        method: 'POST',
-//        dataType: 'json',
-//        data: {
-//            '$csrfParam': '$csrfToken',
-//            department_id: deptId
-//        },
-//        success: function(response) {
-//            let options = '<option value="">Выберите локацию</option>';
-//            response.forEach(function(item) {
-//                options += '<option value="' + item.id + '">' + item.name + '</option>';
-//            });
-//            locSelect.html(options);
-//        },
-//        error: function(xhr) {
-//            console.error('AJAX Error:', xhr.status, xhr.responseText);
-//            locSelect.html('<option value="">Ошибка загрузки</option>');
-//        }
-//    });
-//});
-//JS;
-//
-//$this->registerJs($script);
-//?>
-
-<?php
 $initialDepartmentId = $model->department_id;
 $initialLocationId = $model->location_id;
 $url = Url::to(['/workplace/location-list']);

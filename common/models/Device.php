@@ -124,4 +124,22 @@ class Device extends ActiveRecord
     {
         return $this->workplace ? $this->workplace->location : null;
     }
+
+    /**
+     * Возвращает информацию по устройству в читабельном виде
+     * @param bool $isStr
+     *
+     * @return array|string
+     */
+    public function getDeviceDataStr(bool $isStr = true): array|string
+    {
+        $type  = $this->model->type->name ?? '';
+        $brand = $this->model->brand->name ?? '';
+        $model = $this->model->name ?? '';
+        $employee = $this->workplace->employee->famIO ?? '';
+
+        if ($isStr) return trim("Тип: {$type}, Бренд: {$brand}, Модель: {$model}, Сотрудник: {$employee}");
+        return ["Сотрудник" => $employee, "Тип" => $type, "Бренд" => $brand, "Модель" => $model];
+    }
+
 }
