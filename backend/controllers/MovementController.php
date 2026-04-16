@@ -210,4 +210,54 @@ class MovementController extends SochiMainController
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
+    /**
+     * Отображает детальную информацию о перемещении в модальном окне.
+     *
+     * Метод используется для AJAX-запроса при нажатии на иконку "Просмотр" в GridView.
+     * Возвращает только HTML-содержимое без layout, которое подгружается в Bootstrap Modal.
+     *
+     * @param int $id Идентификатор перемещения
+     * @return string HTML-контент модального окна
+     * @throws NotFoundHttpException Если запись не найдена
+     */
+    public function actionViewModal(int $id): string
+    {
+        $this->layout = false;
+        $model = Movement::findOne($id);
+
+        if ($model === null) {
+            throw new NotFoundHttpException('Перемещение не найдено.');
+        }
+
+        return $this->renderAjax('_view_modal', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * Отображает историю перемещений устройства в отдельном модальном окне.
+     *
+     * @param int $device_id Идентификатор устройства
+     * @return string HTML-контент модального окна
+     * @throws NotFoundHttpException Если устройство не найдено или нет связанных перемещений
+     */
+    public function actionHistoryModal(int $device_id): string
+    {
+        $this->layout = false;
+
+        $movements = Movement::find()
+            ->where(['device_id' => $device_id])
+            ->orderBy(['moved_at' => SORT_DESC])
+            ->all();
+
+        if (empty($movements)) {
+            throw new NotFoundHttpException('История перемещений для данного устройства отсутствует.');
+        }
+
+        return $this->renderAjax('_history_modal', [
+            'movements' => $movements,
+        ]);
+    }
+
 }

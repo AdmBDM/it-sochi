@@ -64,75 +64,63 @@ class Movement extends ActiveRecord
             'note' => 'Примечание',
             'created_at' => 'Создано',
             'updated_at' => 'Обновлено',
+            'type_change' => 'Тип',
         ];
     }
 
-    /**
-     * Связь с устройством (device)
-     *
-     * @return ActiveQuery
-     */
-    public function getDevice(): ActiveQuery
+    // -------------------------
+    // Связи с другими таблицами
+    // -------------------------
+    public function getDevice()
     {
         return $this->hasOne(Device::class, ['id' => 'device_id']);
     }
 
-    /**
-     * Связь с рабочим местом, откуда перемещается техника (старое)
-     *
-     * @return ActiveQuery
-     */
-    public function getFromWorkplace(): ActiveQuery
+    public function getOldWorkplace()
     {
-        return $this->hasOne(Workplace::class, ['id' => 'from_workplace_id']);
+//        return $this->hasOne(Workplace::class, ['id' => 'id_old'])->andWhere(['type_change' => 'place']);
+        return $this->hasOne(Workplace::class, ['id' => 'id_old']);
     }
 
-    /**
-     * Связь с рабочим местом, куда перемещается техника (новое)
-     *
-     * @return ActiveQuery
-     */
-    public function getToWorkplace(): ActiveQuery
+    public function getNewWorkplace()
     {
-        return $this->hasOne(Workplace::class, ['id' => 'to_workplace_id']);
+//        return $this->hasOne(Workplace::class, ['id' => 'id_new'])->andWhere(['type_change' => 'place']);
+        return $this->hasOne(Workplace::class, ['id' => 'id_new']);
     }
 
-    /**
-     * @return ActiveQuery
-     */
-    public function getMovedByUser(): ActiveQuery
+    public function getOldStatus()
     {
-        return $this->hasOne(User::class, ['id' => 'moved_by_user_id']);
+//        return $this->hasOne(DeviceStatus::class, ['id' => 'id_old'])->andWhere(['type_change' => 'status']);
+        return $this->hasOne(DeviceStatus::class, ['id' => 'id_old']);
     }
 
-    /**
-     * Связь с сотрудником, инициировавшим движение
-     *
-     * @return ActiveQuery
-     */
-    public function getEmployee(): ActiveQuery
+    public function getNewStatus()
+    {
+//        return $this->hasOne(DeviceStatus::class, ['id' => 'id_new'])->andWhere(['type_change' => 'status']);
+        return $this->hasOne(DeviceStatus::class, ['id' => 'id_new']);
+    }
+
+    public function getEmployee()
     {
         return $this->hasOne(Employee::class, ['id' => 'moved_by_user_id']);
     }
 
-    /**
-     * связь с организацией
-     *
-     * @return ActiveQuery
-     */
-    public function getOrganization(): ActiveQuery
+    // -------------------------
+    // Виртуальные свойства
+    // -------------------------
+    public function getOldValue()
     {
-        return $this->hasOne(Organization::class, ['id' => 'organization_id']);
+        if ($this->type_change === 'place') {
+            return $this->oldWorkplace ? $this->oldWorkplace->name : null;
+        }
+        return $this->oldStatus ? $this->oldStatus->name : null;
     }
 
-    /**
-     * связь с отделом
-     *
-     * @return ActiveQuery
-     */
-    public function getDepartment(): ActiveQuery
+    public function getNewValue()
     {
-        return $this->hasOne(Department::class, ['id' => 'department_id']);
+        if ($this->type_change === 'place') {
+            return $this->newWorkplace ? $this->newWorkplace->name : null;
+        }
+        return $this->newStatus ? $this->newStatus->name : null;
     }
-
 }

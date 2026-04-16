@@ -18,7 +18,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <hr>
         <h3>Картриджи</h3>
-        <li><?= Html::a('Типы картриджей', ['/cartridge-type']) ?></li>
+        <li><?= Html::a('Ремонты принтеров', ['/printer-repair']) ?></li>
+        <li><?= Html::a('Типы~картриджей', ['/cartridge-type']) ?></li>
         <li><?= Html::a('Принтеры - картриджи', ['/device-cartridge-type']) ?></li>
         <li><?= Html::a('Движение картриджей', ['/cartridge-transfer']) ?></li>
 

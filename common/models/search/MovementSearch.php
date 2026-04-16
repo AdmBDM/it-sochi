@@ -6,139 +6,110 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Movement;
 
-/**
- * MovementSearch represents the model behind the search form of `common\models\Movement`.
- */
 class MovementSearch extends Movement
 {
-    public $id;
-    public $device_id;
-    public $employee_id;
-    public $from_workplace_id;
-    public $to_workplace_id;
-    public $organization_id;
-    public $department_id;
-    public $comment;
-    public $moved_at;
-    public $created_at;
-    public $updated_at;
     public $deviceName;
+    public $oldValueName;
+    public $newValueName;
     public $employeeName;
-    public $fromWorkplaceLabel;
-    public $toWorkplaceLabel;
-    public $organizationName;
-    public $departmentName;
 
-    /**
-     * @return array[]
-     */
     public function rules(): array
     {
         return [
-            [['id', 'device_id', 'employee_id', 'from_workplace_id', 'to_workplace_id', 'organization_id', 'department_id'], 'integer'],
-            [['comment', 'moved_at', 'created_at', 'updated_at'], 'safe'],
-            [['deviceName', 'employeeName', 'fromWorkplaceLabel', 'toWorkplaceLabel', 'organizationName', 'departmentName'], 'safe'],
+            [['id', 'device_id', 'moved_by_user_id', 'device_status_id', 'is_active'], 'integer'],
+            [['comment', 'type_change', 'moved_at', 'deviceName', 'oldValueName', 'newValueName', 'employeeName'], 'safe'],
         ];
     }
 
-    /**
-     * @return array|array[]
-     */
-    public function scenarios(): array
+    public function scenarios()
     {
-        // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
 
-    /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     * @param string|null $formName Form name to be used into `->load()` method.
-     *
-     * @return ActiveDataProvider
-     */
-    public function search(array $params, string $formName = null): ActiveDataProvider
+    public function search($params)
     {
-        $query = Movement::find()->joinWith([
-            'device d',
-            'employee e',
-            'fromWorkplace fw',
-            'toWorkplace tw',
-//            'organization o',
-//            'department dep',
-        ]);
+//        $query = Movement::find()
+//            ->joinWith(['device', 'oldWorkplace', 'newWorkplace', 'oldStatus', 'newStatus', 'employee']);
+        $query = Movement::find()
+            ->joinWith([
+                'device.model.type',
+                'device.model.brand',
+                'oldWorkplace',
+                'newWorkplace',
+                'oldStatus',
+                'newStatus',
+                'employee'
+            ]);
 
-        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['moved_at' => SORT_DESC],
+                'attributes' => [
+                    'id',
+                    'moved_at',
+                    'type_change',
+//                    'deviceName' => [
+//                        'asc' => ['devices.name' => SORT_ASC],
+//                        'desc' => ['devices.name' => SORT_DESC],
+//                    ],
+                    'deviceName' => [
+                        'asc' => [
+                            'device_types.name' => SORT_ASC,
+                            'device_brands.name' => SORT_ASC,
+                            'device_models.name' => SORT_ASC,
+                        ],
+                        'desc' => [
+                            'device_types.name' => SORT_DESC,
+                            'device_brands.name' => SORT_DESC,
+                            'device_models.name' => SORT_DESC,
+                        ],
+                    ],
+                    'oldValueName' => [
+                        'asc' => ['workplaces.name' => SORT_ASC, 'device_statuses.name' => SORT_ASC],
+                        'desc' => ['workplaces.name' => SORT_DESC, 'device_statuses.name' => SORT_DESC],
+                    ],
+                    'newValueName' => [
+                        'asc' => ['workplaces.name' => SORT_ASC, 'device_statuses.name' => SORT_ASC],
+                        'desc' => ['workplaces.name' => SORT_DESC, 'device_statuses.name' => SORT_DESC],
+                    ],
+                    'employeeName' => [
+                        'asc' => ['employees.last_name' => SORT_ASC, 'employees.first_name' => SORT_ASC, 'employees.middle_name' => SORT_ASC],
+                        'desc' => ['employees.last_name' => SORT_DESC, 'employees.first_name' => SORT_DESC, 'employees.middle_name' => SORT_DESC],
+                    ],
+                ],
+            ],
         ]);
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
-
-        $dataProvider->sort->attributes['deviceName'] = [
-            'asc' => ['d.name' => SORT_ASC],
-            'desc' => ['d.name' => SORT_DESC],
-        ];
-
-        $dataProvider->sort->attributes['employeeName'] = [
-            'asc' => ['e.full_name' => SORT_ASC],
-            'desc' => ['e.full_name' => SORT_DESC],
-//            'asc' => ['e.lastname' => SORT_ASC, 'e.firstname' => SORT_ASC],
-//            'desc' => ['e.lastname' => SORT_DESC, 'e.firstname' => SORT_DESC],
-        ];
-
-        $dataProvider->sort->attributes['fromWorkplaceLabel'] = [
-            'asc' => ['fw.label' => SORT_ASC],
-            'desc' => ['fw.label' => SORT_DESC],
-        ];
-
-        $dataProvider->sort->attributes['toWorkplaceLabel'] = [
-            'asc' => ['tw.label' => SORT_ASC],
-            'desc' => ['tw.label' => SORT_DESC],
-        ];
-
-//        $dataProvider->sort->attributes['organizationName'] = [
-//            'asc' => ['o.name' => SORT_ASC],
-//            'desc' => ['o.name' => SORT_DESC],
-//        ];
-
-//        $dataProvider->sort->attributes['departmentName'] = [
-//            'asc' => ['dep.name' => SORT_ASC],
-//            'desc' => ['dep.name' => SORT_DESC],
-//        ];
-
-        $this->load($params, $formName);
+        $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'device_id' => $this->device_id,
-            'from_workplace_id' => $this->from_workplace_id,
-            'to_workplace_id' => $this->to_workplace_id,
-            'moved_at' => $this->moved_at,
-            'moved_by_user_id' => $this->moved_by_user_id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+        $query->andFilterWhere(['movements.id' => $this->id])
+            ->andFilterWhere(['movements.type_change' => $this->type_change])
+            ->andFilterWhere(['movements.is_active' => $this->is_active])
+            ->andFilterWhere(['like', 'workplaces.name', $this->oldValueName])
+            ->andFilterWhere(['like', 'workplaces.name', $this->newValueName])
+            ->andFilterWhere(['like', 'device_statuses.name', $this->oldValueName])
+            ->andFilterWhere(['like', 'device_statuses.name', $this->newValueName])
+        ;
+
+        $query->andFilterWhere(['or',
+            ['ilike', 'employees.last_name', $this->employeeName],
+            ['ilike', 'employees.first_name', $this->employeeName],
+            ['ilike', 'employees.middle_name', $this->employeeName],
         ]);
 
-        $query->andFilterWhere(['ilike', 'comment', $this->comment])
-            ->andFilterWhere(['ilike', 'd.name', $this->deviceName])
-            ->andFilterWhere(['ilike', 'e.full_name', $this->employeeName])
-            ->andFilterWhere(['ilike', 'fw.label', $this->fromWorkplaceLabel])
-            ->andFilterWhere(['ilike', 'tw.label', $this->toWorkplaceLabel])
-//            ->andFilterWhere(['ilike', 'o.name', $this->organizationName])
-//            ->andFilterWhere(['ilike', 'dep.name', $this->departmentName])
-        ;
+        $query->andFilterWhere(['or',
+            ['ilike', 'device_types.name', $this->deviceName],
+            ['ilike', 'device_brands.name', $this->deviceName],
+            ['ilike', 'device_models.name', $this->deviceName],
+            ['ilike', 'devices.serial_number', $this->deviceName],
+        ]);
+
 
         return $dataProvider;
     }

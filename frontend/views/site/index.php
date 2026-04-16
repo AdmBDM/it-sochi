@@ -13,4 +13,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="body-content">
         <p>Это стартовая страница фронтенда. Здесь будет размещена общая информация.</p>
     </div>
+
+    <a href="/instruction.docx">Инструкция</a>
 </div>

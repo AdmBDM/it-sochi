@@ -20,6 +20,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'btn btn-danger',
             'data' => ['confirm' => 'Удалить это устройство?', 'method' => 'post'],
         ]) ?>
+        <?php if ($model->getIsPrinter()): ?>
+            <?= Html::a('Добавить ремонт', ['/printer-repair/create', 'device_id' => $model->id], [
+                    'class' => 'btn btn-warning'
+            ]) ?>
+        <?php endif; ?>
     </p>
 
     <?= DetailView::widget([

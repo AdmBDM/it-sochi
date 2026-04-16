@@ -15,6 +15,7 @@ BootstrapAsset::register($this);
 $this->registerCssFile('@web/css/site.css', [
     'depends' => [YiiAsset::class],
 ]);
+$this->registerCssFile('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css');
 
 ?>
 <?php $this->beginPage() ?>

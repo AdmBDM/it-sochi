@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use PrinterPageCounter;
+use PrinterRepair;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -106,7 +108,8 @@ class Device extends ActiveRecord
      */
     public function getType(): mixed
     {
-        return $this->model ? $this->type->name : null;
+//        return $this->model ? $this->type->name : null;
+        return $this->model ? $this->model->type : null;
     }
 
     /**
@@ -142,4 +145,52 @@ class Device extends ActiveRecord
         return ["Сотрудник" => $employee, "Тип" => $type, "Бренд" => $brand, "Модель" => $model];
     }
 
+    /**
+     * @return string
+     */
+    public function getFullName(): string
+    {
+        $type  = $this->model->type->name ?? '';
+        $brand = $this->model->brand->name ?? '';
+        $model = $this->model->name ?? '';
+        $sn = $this->serial_number ?? '';
+        return trim("{$type} {$brand} {$model}, s/n: {$sn}");
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsPrinter(): bool
+    {
+        return $this->model->type->name === 'Принтер' || $this->model->type->name === 'МФУ';
+    }
+
+    /**
+     * @return array
+     */
+    public function getPrinterStats(): array
+    {
+        if (!$this->getIsPrinter()) return [];
+
+        $metrics = json_decode($this->printer_metrics ?? '{}', true);
+
+        return [
+            'total_pages' => $metrics['total_pages'] ?? null,
+            'last_reading' => $metrics['last_reading_at'] ?? null,
+            'monthly_load' => PrinterPageCounter::getMonthlyLoad($this->id),
+            'repairs_count' => $this->getPrinterRepairs()->count(),
+            'repairs_cost' => $this->getPrinterRepairs()->sum('cost') ?: 0,
+            'cartridge_changes' => $this->getCartridgeReplacements()->count(),
+            'last_repair' => $this->getPrinterRepairs()->orderBy('started_at DESC')->one(),
+        ];
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getPrinterRepairs(): ActiveQuery
+    {
+        return $this->hasMany(PrinterRepair::class, ['device_id' => 'id'])
+            ->orderBy(['started_at' => SORT_DESC]);
+    }
 }

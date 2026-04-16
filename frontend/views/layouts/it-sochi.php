@@ -59,7 +59,7 @@ $this->registerCssFile('@web/css/site.css', [
     ?>
 
     <div class="container mt-4">
-        <?= Breadcrumbs::widget(['links' => $this->params['breadcrumbs'] ?? []]) ?>
+<!--        --><?php //= Breadcrumbs::widget(['links' => $this->params['breadcrumbs'] ?? []]) ?>
         <?= $content ?>
     </div>
 </div>
