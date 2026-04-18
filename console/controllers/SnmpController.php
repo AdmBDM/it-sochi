@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use common\models\Device;
+use common\models\DiscoveredPrinter;
 use common\models\PrinterPageCounter;
 use Yii;
 use yii\console\Controller;
@@ -124,29 +125,96 @@ class SnmpController extends Controller
 
     /**
      * @param int $threads
-     * @return void
+     *
+     * @return int
      */
-    public function actionDiscoverNetwork(int $threads = 50): void
+    public function actionDiscoverNetwork(int $threads = 50): int
     {
+        $this->stdout("SNMP discovery started for 192.168.88.0/21\n");
+        $this->stdout("Threads: $threads\n\n");
+
+        // Генерируем все IP /21
         $ips = [];
-        for ($t = 88; $t <= 95; $t++) {
-            for ($f = 1; $f <= 254; $f++) {
-                $ips[] = "192.168.$t.$f";
+        for ($third = 88; $third <= 95; $third++) {
+            for ($fourth = 1; $fourth <= 254; $fourth++) {
+                $ips[] = "192.168.$third.$fourth";
             }
         }
 
+        $total = count($ips);
         $found = [];
-        $pool = new \SplQueue();
-        foreach ($ips as $ip) $pool->enqueue($ip);
+        $processed = 0;
 
-        $workers = [];
-        for ($i = 0; $i < $threads; $i++) {
-            $workers[] = $this->spawnSnmpWorker($pool, $found);
+        foreach ($ips as $ip) {
+            $processed++;
+
+            // Прогресс каждые 50 адресов
+            if ($processed % 50 === 0) {
+                $percent = round($processed / $total * 100);
+                $this->stdout("\rProgress: $processed/$total ($percent%) | Found: " . count($found));
+            }
+
+            // SNMP-запрос с таймаутом 300ms
+            $descr = @snmpget($ip, 'public', '1.3.6.1.2.1.1.1.0', 300000, 1);
+
+            if ($descr && preg_match('/(printer|kyocera|hp|brother|canon|xerox|ricoh|epson)/i', $descr)) {
+                $name = @snmpget($ip, 'public', '1.3.6.1.2.1.1.5.0', 300000, 1);
+
+                $printer = [
+                    'ip' => $ip,
+                    'name' => $name ? trim($name, '"') : 'Unknown',
+                    'descr' => trim($descr, '"'),
+                ];
+                $found[] = $printer;
+
+                $this->stdout("\n✓ Found: $ip - {$printer['name']}\n");
+            }
         }
 
-        // Ожидание завершения...
+        $this->stdout("\r\n\n=== Results ===\n");
+        $this->stdout("Scanned: $total\n");
+        $this->stdout("Found: " . count($found) . "\n");
 
-        $this->saveDiscovered($found, 'network');
-        $this->stdout("Network scan: " . count($found) . " printers\n");
+        if (!empty($found)) {
+            $this->saveDiscovered($found, 'snmp');
+        }
+
+        return 0;
+    }
+
+    /**
+     * @param array $found
+     * @param string $source
+     *
+     * @return void
+     * @throws Exception
+     */
+    private function saveDiscovered(array $found, string $source): void
+    {
+        $reportFile = Yii::getAlias("@runtime/printers_discovered_{$source}_" . date('Ymd_His') . '.json');
+        file_put_contents($reportFile, json_encode($found, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        // Сохранение в БД для сопоставления
+        foreach ($found as $printer) {
+            $model = DiscoveredPrinter::findOne(['ip' => $printer['ip']]) ?? new DiscoveredPrinter();
+
+            $model->attributes = [
+                'ip' => $printer['ip'],
+                'snmp_name' => $printer['name'] ?? null,
+                'snmp_descr' => $printer['descr'] ?? null,
+                'guessed_model' => $this->guessModel($printer['descr'] ?? ''),
+                'discovered_at' => date('Y-m-d H:i:s'),
+                'source' => $source,
+                'is_local' => false,
+                'matched_device_id' => null, // сопоставляется вручную или автоматически
+            ];
+
+            if (!$model->save()) {
+                Yii::error("Failed to save discovered printer {$printer['ip']}: " . json_encode($model->errors));
+            }
+        }
+
+        $this->stdout("Saved to: $reportFile\n");
+        $this->stdout("Database: " . count($found) . " records\n");
     }
 }
