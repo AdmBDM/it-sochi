@@ -160,10 +160,15 @@ class SnmpController extends Controller
             if ($descr && preg_match('/(printer|kyocera|hp|brother|canon|xerox|ricoh|epson)/i', $descr)) {
                 $name = @snmpget($ip, 'public', '1.3.6.1.2.1.1.5.0', 300000, 1);
 
+                // ← ДОБАВЛЯЕМ идентификаторы
+                $ids = $this->getPrinterIdentifiers($ip);
+
                 $printer = [
                     'ip' => $ip,
                     'name' => $name ? trim($name, '"') : 'Unknown',
                     'descr' => trim($descr, '"'),
+                    'mac' => $ids['mac'],        // ←
+                    'serial' => $ids['serial'],  // ←
                 ];
                 $found[] = $printer;
 
@@ -230,13 +235,13 @@ class SnmpController extends Controller
 
             $model->attributes = [
                 'ip' => $printer['ip'],
-                'mac_address' => $ids['mac'],
-                'serial_snmp' => $ids['serial'],
+                'mac_address' => $printer['mac'],
+                'serial_snmp' => $printer['serial'],
                 'snmp_name' => $printer['name'],
                 'snmp_descr' => $printer['descr'],
                 'guessed_model' => $this->guessModel($printer['descr']),
                 'discovered_at' => date('Y-m-d H:i:s'),
-                'source' => $source,
+                'source' => $source ?? '0snmp0',
             ];
 
             if (!$model->save()) {
