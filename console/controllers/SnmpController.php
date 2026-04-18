@@ -4,6 +4,7 @@ namespace console\controllers;
 
 use common\models\Device;
 use common\models\PrinterPageCounter;
+use Yii;
 use yii\console\Controller;
 use yii\db\Exception;
 
@@ -85,5 +86,67 @@ class SnmpController extends Controller
         }
 
         return $result;
+    }
+
+    /**
+     * @return void
+     */
+    public function actionDiscover(): void
+    {
+        // /21 = 2046 адресов: 192.168.88.0 - 192.168.95.255
+        // Пропускаем .0 и .255 в каждой /24
+        $found = [];
+        $total = 0;
+
+        for ($third = 88; $third <= 95; $third++) {
+            for ($fourth = 1; $fourth <= 254; $fourth++) {
+                $ip = "192.168.$third.$fourth";
+                $total++;
+
+                // Быстрый check с таймаутом 200ms
+                $descr = @snmpget($ip, 'public', '1.3.6.1.2.1.1.1.0', 200000, 1);
+
+                if ($descr && preg_match('/(printer|kyocera|hp|brother|canon|xerox)/i', $descr)) {
+                    $name = @snmpget($ip, 'public', '1.3.6.1.2.1.1.5.0', 200000, 1);
+                    $found[] = [
+                        'ip' => $ip,
+                        'name' => $name ? trim($name, '"') : 'Unknown',
+                        'descr' => trim($descr, '"'),
+                    ];
+                    $this->stdout("✓ $ip\n");
+                }
+            }
+        }
+
+        $this->stdout("\nScanned: $total, Found: " . count($found) . "\n");
+        file_put_contents(Yii::getAlias('@runtime/printers_discovered.json'), json_encode($found, JSON_PRETTY_PRINT));
+    }
+
+    /**
+     * @param int $threads
+     * @return void
+     */
+    public function actionDiscoverNetwork(int $threads = 50): void
+    {
+        $ips = [];
+        for ($t = 88; $t <= 95; $t++) {
+            for ($f = 1; $f <= 254; $f++) {
+                $ips[] = "192.168.$t.$f";
+            }
+        }
+
+        $found = [];
+        $pool = new \SplQueue();
+        foreach ($ips as $ip) $pool->enqueue($ip);
+
+        $workers = [];
+        for ($i = 0; $i < $threads; $i++) {
+            $workers[] = $this->spawnSnmpWorker($pool, $found);
+        }
+
+        // Ожидание завершения...
+
+        $this->saveDiscovered($found, 'network');
+        $this->stdout("Network scan: " . count($found) . " printers\n");
     }
 }
