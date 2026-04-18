@@ -1,6 +1,6 @@
 // Скрипты бэкенда
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Admin panel initialized');
+    console.log('Admin-panel initialized');
 
     // Инициализация сайдбара
     const sidebarToggle = document.querySelector('.sidebar-toggle');

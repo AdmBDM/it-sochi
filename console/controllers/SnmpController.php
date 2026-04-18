@@ -1,17 +1,21 @@
 <?php
 // console/controllers/SnmpController.php
+namespace console\controllers;
+
 use common\models\Device;
+use common\models\PrinterPageCounter;
 use yii\console\Controller;
+use yii\db\Exception;
 
 class SnmpController extends Controller
 {
     /**
      * yii snmp/poll [--device-id=123] [--verbose]
-     *
      * @param $deviceId
      * @param $verbose
      *
      * @return void
+     * @throws Exception
      */
     public function actionPoll($deviceId = null, $verbose = false): void
     {

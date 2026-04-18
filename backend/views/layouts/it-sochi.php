@@ -31,7 +31,7 @@ $this->registerCssFile('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => 'IT Sochi — ' . (Yii::$app->controller->module->id ?? 'frontend'),
+        'brandLabel' => 'IT АБС-Авто Сочи',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => ['class' => 'navbar navbar-expand-md navbar-dark bg-dark'],
     ]);
