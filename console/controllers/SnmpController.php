@@ -217,4 +217,32 @@ class SnmpController extends Controller
         $this->stdout("Saved to: $reportFile\n");
         $this->stdout("Database: " . count($found) . " records\n");
     }
+
+    /**
+     * @param string $descr
+     * @return string|null
+     */
+    private function guessModel(string $descr): ?string
+    {
+        $patterns = [
+            '/Kyocera\s+(ECOSYS\s+[A-Z0-9]+)/i' => '$1',
+            '/Kyocera\s+([A-Z0-9]+)/i' => 'Kyocera $1',
+            '/HP\s+(LaserJet\s+\w+|M\d+[a-z]*)/i' => 'HP $1',
+            '/Hewlett-Packard.*(LaserJet|MFP|M\d+)/i' => 'HP $1',
+            '/Brother\s+(HL-[A-Z0-9]+|DCP-[A-Z0-9]+|MFC-[A-Z0-9]+)/i' => 'Brother $1',
+            '/Brother\s+([A-Z0-9]+)/i' => 'Brother $1',
+            '/Canon\s+(i-SENSYS\s+[A-Z0-9]+|LBP\d+|MF\d+)/i' => 'Canon $1',
+            '/Xerox\s+(Phaser\s+\d+|WorkCentre\s+\d+)/i' => 'Xerox $1',
+            '/Ricoh\s+(SP\s+\d+|MP\s+\w+)/i' => 'Ricoh $1',
+            '/Epson\s+(WorkForce|AcuLaser\s+\w+)/i' => 'Epson $1',
+        ];
+
+        foreach ($patterns as $regex => $replacement) {
+            if (preg_match($regex, $descr, $m)) {
+                return preg_replace($regex, $replacement, $descr);
+            }
+        }
+
+        return null;
+    }
 }
