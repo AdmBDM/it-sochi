@@ -195,27 +195,58 @@ class SnmpController extends Controller
         file_put_contents($reportFile, json_encode($found, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
         // Сохранение в БД для сопоставления
+        $newCount = 0;
+        $updatedCount = 0;
+
         foreach ($found as $printer) {
-            $model = DiscoveredPrinter::findOne(['ip' => $printer['ip']]) ?? new DiscoveredPrinter();
+            $ids = $this->getPrinterIdentifiers($printer['ip']);
+
+            // Ищем по приоритету: MAC → Serial → IP
+            $model = null;
+
+            if ($ids['mac']) {
+                $model = DiscoveredPrinter::findOne(['mac_address' => $ids['mac']]);
+            }
+
+            if (!$model && $ids['serial']) {
+                $model = DiscoveredPrinter::findOne(['serial_snmp' => $ids['serial']]);
+            }
+
+            if (!$model) {
+                $model = DiscoveredPrinter::findOne(['ip' => $printer['ip']]);
+            }
+
+            $isNew = $model === null;
+            if ($isNew) {
+                $model = new DiscoveredPrinter();
+                $newCount++;
+            } else {
+                $updatedCount++;
+                // Сохраняем предыдущий IP перед обновлением
+                if ($model->ip !== $printer['ip']) {
+                    $model->last_ip = $model->ip;
+                }
+            }
 
             $model->attributes = [
                 'ip' => $printer['ip'],
-                'snmp_name' => $printer['name'] ?? null,
-                'snmp_descr' => $printer['descr'] ?? null,
-                'guessed_model' => $this->guessModel($printer['descr'] ?? ''),
+                'mac_address' => $ids['mac'],
+                'serial_snmp' => $ids['serial'],
+                'snmp_name' => $printer['name'],
+                'snmp_descr' => $printer['descr'],
+                'guessed_model' => $this->guessModel($printer['descr']),
                 'discovered_at' => date('Y-m-d H:i:s'),
                 'source' => $source,
-                'is_local' => false,
-                'matched_device_id' => null, // сопоставляется вручную или автоматически
             ];
 
             if (!$model->save()) {
-                Yii::error("Failed to save discovered printer {$printer['ip']}: " . json_encode($model->errors));
+                Yii::error("Failed to save {$printer['ip']}: " . json_encode($model->errors));
             }
         }
 
         $this->stdout("Saved to: $reportFile\n");
         $this->stdout("Database: " . count($found) . " records\n");
+        $this->stdout("\nNew: $newCount, Updated: $updatedCount\n");
     }
 
     /**
@@ -245,4 +276,46 @@ class SnmpController extends Controller
 
         return null;
     }
+
+    /**
+     * @param string $ip
+     *
+     * @return null[]
+     */
+    private function getPrinterIdentifiers(string $ip): array
+    {
+        $result = [
+            'mac' => null,
+            'serial' => null,
+        ];
+
+        // 1. MAC через ARP (надёжнее SNMP для MAC)
+        $arp = shell_exec("ip neigh show $ip 2>/dev/null");
+        if (preg_match('/([0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2})/i', $arp, $m)) {
+            $result['mac'] = strtolower($m[1]);
+        }
+
+        // 2. Серийный номер через SNMP
+        // prtGeneralSerialNumber (стандарт Printer MIB)
+        $oids = [
+            '1.3.6.1.2.1.43.5.1.1.17.1',      // стандартный
+            '1.3.6.1.4.1.1347.43.5.1.1.28.1',  // Kyocera
+            '1.3.6.1.4.1.11.2.3.9.4.2.1.1.3.0', // HP
+            '1.3.6.1.4.1.2435.2.3.9.4.2.1.5.5.1.0', // Brother
+        ];
+
+        foreach ($oids as $oid) {
+            $raw = @snmpget($ip, 'public', $oid, 200000, 1);
+            if ($raw) {
+                $serial = trim($raw, '" ');
+                if (!empty($serial) && $serial !== 'NULL') {
+                    $result['serial'] = $serial;
+                    break;
+                }
+            }
+        }
+
+        return $result;
+    }
+
 }
