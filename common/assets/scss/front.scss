@@ -1,0 +1,13 @@
+@charset "UTF-8";
+
+// Импорт общих зависимостей
+@use "variables" as *;
+@use "mixins";
+@use "base";
+
+// === FRONTEND СПЕЦИФИЧНЫЕ СТИЛИ ===
+
+// Фон фронтенда
+body {
+  background-color: $bg-frontend;
+}

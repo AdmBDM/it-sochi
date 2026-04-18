@@ -1,0 +1,44 @@
+@charset "UTF-8";
+
+// Импорт общих зависимостей
+@use "variables" as *;
+@use "mixins";
+@use "base";
+
+// === BACKEND СПЕЦИФИЧНЫЕ СТИЛИ ===
+
+// Фон бэкенда
+body {
+  background-color: $bg-backend;
+}
+
+// Breadcrumb кастомизация
+.breadcrumb-item + .breadcrumb-item::before {
+  content: $breadcrumb-separator;
+  padding: 0 $spacer-sm;
+}
+
+// Dev info блок (специфично для бэкенда)
+p.dev-info {
+  display: block;
+  margin-bottom: 0;
+
+  strong {
+    @include dev-info-label;
+  }
+}
+
+// Формы и отступы
+.mb-2 {
+  margin-top: 20px; // TODO: заменить на переменную при рефакторинге
+
+  input {
+    margin-left: $dev-info-margin;
+    padding-left: $dev-info-margin;
+  }
+}
+
+// Пагинация
+.pagination li {
+  padding-left: 5px;
+}

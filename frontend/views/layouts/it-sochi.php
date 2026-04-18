@@ -3,18 +3,13 @@
 /** @var \yii\web\View $this */
 /** @var string $content */
 
+use frontend\assets\AppAsset;          // ← Добавляем импорт frontend ассета
 use yii\helpers\Html;
 use yii\bootstrap5\Nav;
 use yii\bootstrap5\NavBar;
 use yii\widgets\Breadcrumbs;
-use yii\web\YiiAsset;
-use yii\bootstrap5\BootstrapAsset;
 
-YiiAsset::register($this);
-BootstrapAsset::register($this);
-$this->registerCssFile('@web/css/site.css', [
-    'depends' => [YiiAsset::class],
-]);
+AppAsset::register($this);              // ← Регистрируем наш ассет (заменяет YiiAsset + BootstrapAsset + site.css)
 
 ?>
 <?php $this->beginPage() ?>

@@ -3,18 +3,15 @@
 /** @var \yii\web\View $this */
 /** @var string $content */
 
-use yii\bootstrap5\BootstrapAsset;
+use backend\assets\AppAsset;           // ← Добавляем импорт backend ассета
 use yii\bootstrap5\Nav;
 use yii\bootstrap5\NavBar;
 use yii\helpers\Html;
-use yii\web\YiiAsset;
 use yii\widgets\Breadcrumbs;
 
-YiiAsset::register($this);
-BootstrapAsset::register($this);
-$this->registerCssFile('@web/css/site.css', [
-    'depends' => [YiiAsset::class],
-]);
+AppAsset::register($this);              // ← Регистрируем наш ассет (заменяет YiiAsset + BootstrapAsset + site.css)
+
+// Опционально: CDN иконки можно оставить здесь или перенести в AppAsset
 $this->registerCssFile('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css');
 
 ?>

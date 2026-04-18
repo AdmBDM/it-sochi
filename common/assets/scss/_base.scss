@@ -1,0 +1,9 @@
+@charset "UTF-8";
+@use "variables" as *;
+// Общие базовые стили для backend и frontend
+
+body {
+  font-family: $font-family-base;
+  margin: 0;
+  padding: 0;
+}
