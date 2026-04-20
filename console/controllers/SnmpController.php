@@ -135,7 +135,8 @@ class SnmpController extends Controller
 
         // Генерируем все IP /21
         $ips = [];
-        for ($third = 88; $third <= 95; $third++) {
+//        for ($third = 88; $third <= 95; $third++) {
+        for ($third = 88; $third <= 89; $third++) {
             for ($fourth = 1; $fourth <= 254; $fourth++) {
                 $ips[] = "192.168.$third.$fourth";
             }
@@ -245,6 +246,7 @@ class SnmpController extends Controller
             ];
 
             if (!$model->save()) {
+                myDebug($model);
                 Yii::error("Failed to save {$printer['ip']}: " . json_encode($model->errors));
             }
         }
