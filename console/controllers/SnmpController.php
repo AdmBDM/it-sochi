@@ -233,20 +233,31 @@ class SnmpController extends Controller
                     $model->last_ip = $model->ip;
                 }
             }
+//
+//            $model->attributes = [
+//                'ip' => $printer['ip'],
+//                'mac_address' => $printer['mac'],
+//                'serial_snmp' => $printer['serial'],
+//                'snmp_name' => $printer['name'],
+//                'snmp_descr' => $printer['descr'],
+//                'guessed_model' => $this->guessModel($printer['descr']),
+//                'discovered_at' => date('Y-m-d H:i:s'),
+//                'source' => $source ?? '0snmp0',
+//            ];
 
-            $model->attributes = [
-                'ip' => $printer['ip'],
-                'mac_address' => $printer['mac'],
-                'serial_snmp' => $printer['serial'],
-                'snmp_name' => $printer['name'],
-                'snmp_descr' => $printer['descr'],
-                'guessed_model' => $this->guessModel($printer['descr']),
-                'discovered_at' => date('Y-m-d H:i:s'),
-                'source' => $source ?? '0snmp0',
-            ];
+            // Прямое присвоение вместо attributes()
+            $model->ip = $printer['ip'];
+            $model->mac_address = $printer['mac'] ?? $ids['mac'];
+            $model->serial_snmp = $printer['serial'] ?? $ids['serial'];
+            $model->snmp_name = $printer['name'];
+            $model->snmp_descr = $printer['descr'];
+            $model->guessed_model = $this->guessModel($printer['descr']);
+            $model->discovered_at = date('Y-m-d H:i:s');
+            $model->source = $source;
+            $model->is_local = false;
 
             if (!$model->save()) {
-                myDebug($model);
+//                myDebug($model);
                 Yii::error("Failed to save {$printer['ip']}: " . json_encode($model->errors));
             }
         }
