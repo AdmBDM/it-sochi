@@ -135,8 +135,7 @@ class SnmpController extends Controller
 
         // Генерируем все IP /21
         $ips = [];
-//        for ($third = 88; $third <= 95; $third++) {
-        for ($third = 88; $third <= 89; $third++) {
+        for ($third = 88; $third <= 95; $third++) {
             for ($fourth = 1; $fourth <= 254; $fourth++) {
                 $ips[] = "192.168.$third.$fourth";
             }
