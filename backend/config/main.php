@@ -13,6 +13,13 @@ return [
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log'],
     'defaultRoute' => 'dashboard/index',
+
+    'on beforeRequest' => function($event) {
+        if (strpos(Yii::$app->request->url, '/api/') !== false) {
+            Yii::$app->user->loginUrl = null;
+        }
+    },
+
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-backend',
@@ -53,6 +60,8 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+//                'admin/api/agent/report' => 'api/agent-report',
+                'api/agent/report' => 'api/agent-report',
                 'printer-repairs' => 'printer-repair/index',
                 'printer-repair/create' => 'printer-repair/create',
                 'printer-repair/update/<id:\d+>' => 'printer-repair/update',

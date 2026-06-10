@@ -130,13 +130,25 @@ class SnmpController extends Controller
      */
     public function actionDiscoverNetwork(int $threads = 50): int
     {
+        snmp_set_quick_print(true);
+        snmp_set_enum_print(true);
+        snmp_set_oid_numeric_print(true);
+
         $this->stdout("SNMP discovery started for 192.168.88.0/21\n");
         $this->stdout("Threads: $threads\n\n");
 
         // Генерируем все IP /21
         $ips = [];
-        for ($third = 88; $third <= 95; $third++) {
-            for ($fourth = 1; $fourth <= 254; $fourth++) {
+        $initOct = 88;
+        $endOct = 95;
+        $initOct4 = 1;
+        $endOct4 = 254;
+//        $initOct = 90;
+//        $endOct = 90;
+//        $initOct4 = 200;
+//        $endOct4 = 254;
+        for ($third = $initOct; $third <= $endOct; $third++) {
+            for ($fourth = $initOct4; $fourth <= $endOct4; $fourth++) {
                 $ips[] = "192.168.$third.$fourth";
             }
         }
@@ -157,7 +169,7 @@ class SnmpController extends Controller
             // SNMP-запрос с таймаутом 300ms
             $descr = @snmpget($ip, 'public', '1.3.6.1.2.1.1.1.0', 300000, 1);
 
-            if ($descr && preg_match('/(printer|kyocera|hp|brother|canon|xerox|ricoh|epson)/i', $descr)) {
+            if ($descr && preg_match('/(printer|kyocera|hp|brother|canon|xerox|ricoh|epson|tsc|barcode|label|zebra|godex|argox|te210|ttp|tdp)/i', $descr)) {
                 $name = @snmpget($ip, 'public', '1.3.6.1.2.1.1.5.0', 300000, 1);
 
                 // ← ДОБАВЛЯЕМ идентификаторы
@@ -213,7 +225,10 @@ class SnmpController extends Controller
                 $model = DiscoveredPrinter::findOne(['mac_address' => $ids['mac']]);
             }
 
-            if (!$model && $ids['serial']) {
+//            if (!$model && $ids['serial']) {
+//                $model = DiscoveredPrinter::findOne(['serial_snmp' => $ids['serial']]);
+//            }
+            if (!$model && $ids['serial'] && !preg_match('/^0+$/', $ids['serial'])) {
                 $model = DiscoveredPrinter::findOne(['serial_snmp' => $ids['serial']]);
             }
 
@@ -232,17 +247,6 @@ class SnmpController extends Controller
                     $model->last_ip = $model->ip;
                 }
             }
-//
-//            $model->attributes = [
-//                'ip' => $printer['ip'],
-//                'mac_address' => $printer['mac'],
-//                'serial_snmp' => $printer['serial'],
-//                'snmp_name' => $printer['name'],
-//                'snmp_descr' => $printer['descr'],
-//                'guessed_model' => $this->guessModel($printer['descr']),
-//                'discovered_at' => date('Y-m-d H:i:s'),
-//                'source' => $source ?? '0snmp0',
-//            ];
 
             // Прямое присвоение вместо attributes()
             $model->ip = $printer['ip'];
@@ -252,12 +256,14 @@ class SnmpController extends Controller
             $model->snmp_descr = $printer['descr'];
             $model->guessed_model = $this->guessModel($printer['descr']);
             $model->discovered_at = date('Y-m-d H:i:s');
-            $model->source = $source;
+            $model->source = $source ?? '---';
             $model->is_local = false;
 
             if (!$model->save()) {
-//                myDebug($model);
                 Yii::error("Failed to save {$printer['ip']}: " . json_encode($model->errors));
+                $this->stderr("FAIL {$printer['ip']}: " . json_encode($model->errors) . "\n");
+//            } else {
+//                $this->stdout("OK {$printer['ip']} id={$model->id}\n");
             }
         }
 
@@ -283,6 +289,8 @@ class SnmpController extends Controller
             '/Xerox\s+(Phaser\s+\d+|WorkCentre\s+\d+)/i' => 'Xerox $1',
             '/Ricoh\s+(SP\s+\d+|MP\s+\w+)/i' => 'Ricoh $1',
             '/Epson\s+(WorkForce|AcuLaser\s+\w+)/i' => 'Epson $1',
+            '/TSC\s+(TE\d+|TTP\d+|TDP\d+)/i' => 'TSC $1',
+            '/Barcode\s+Printer/i' => 'Barcode Printer',
         ];
 
         foreach ($patterns as $regex => $replacement) {

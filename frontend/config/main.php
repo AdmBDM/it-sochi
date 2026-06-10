@@ -10,8 +10,16 @@ $params = array_merge(
 return [
     'id' => 'app-frontend',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => [
+        'log',
+//        'api',
+    ],
     'controllerNamespace' => 'frontend\controllers',
+//    'modules' => [
+//        'api' => [
+//            'class' => 'common\modules\api\Module',
+//        ],
+//    ],
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-frontend',
@@ -51,6 +59,9 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+//                'api/agent/report' => 'api-agent/report',
+//                'agent-report' => 'api-agent/report',
+                'printer-report' => 'agentreport/index',
                 '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
                 '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
             ],

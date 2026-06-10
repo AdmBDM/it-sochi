@@ -23,6 +23,7 @@ class SiteController extends SochiMainController
         return [
             'access' => [
                 'class' => AccessControl::class,
+                'except' => ['agent-report'],
                 'rules' => [
                     [
                         'actions' => ['login', 'error'],
@@ -101,10 +102,15 @@ class SiteController extends SochiMainController
     {
         Yii::$app->user->logout();
 
-//        return $this->goHome();
-//        return Yii::$app->getResponse()->redirect(Yii::$app->urlManager->hostInfo . '/');  // ������� �� frontend
-
 //        return $this->redirect('http://it-sochi/'); // локальный адрес фронта
         return $this->redirect(Yii::$app->params['frontendUrl'] ?? 'http://it-sochi/');
     }
+
+// backend/controllers/SiteController.php — временно
+    public function actionTest()
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        return ['route' => \Yii::$app->requestedRoute, 'ok' => true];
+    }
+
 }
