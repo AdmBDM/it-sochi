@@ -5,6 +5,17 @@ namespace common\models;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
+/**
+ * @property int $id
+ * @property int $dvr_id
+ * @property string|null $scan_type
+ * @property string|null $status
+ * @property string|null $message
+ * @property array|null $details
+ * @property string $created_at
+ * @property string $updated_at
+ */
+
 class ScanLog extends ActiveRecord
 {
     public const string TYPE_DVR = 'dvr_scan';

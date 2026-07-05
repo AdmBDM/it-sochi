@@ -169,7 +169,7 @@ class SnmpController extends Controller
             // SNMP-запрос с таймаутом 300ms
             $descr = @snmpget($ip, 'public', '1.3.6.1.2.1.1.1.0', 300000, 1);
 
-            if ($descr && preg_match('/(printer|kyocera|hp|brother|canon|xerox|ricoh|epson|tsc|barcode|label|zebra|godex|argox|te210|ttp|tdp)/i', $descr)) {
+            if ($descr && preg_match('/(printer|kyocera|hp|brother|canon|xerox|ricoh|epson|tsc|barcode|label|zebra|godex|argox|te210|te310|ttp|tdp)/i', $descr)) {
                 $name = @snmpget($ip, 'public', '1.3.6.1.2.1.1.5.0', 300000, 1);
 
                 // ← ДОБАВЛЯЕМ идентификаторы
