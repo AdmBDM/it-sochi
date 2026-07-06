@@ -123,17 +123,37 @@ class TrassirService extends BaseCctvService
             // Получаем состояние объекта
             $objectState = $this->apiGet('/objects/' . $guid . '/');
 
+//            $camData = [
+//                'guid' => $guid,
+//                'name' => $name,
+//                'status' => ($objectState['online'] ?? false) ? Camera::STATUS_ONLINE : Camera::STATUS_OFFLINE,
+//                'stream_main' => sprintf(
+//                    '%s/get_video?channel=%s&container=rtsp&stream=main&sid=%s',
+//                    $this->baseUrl, $guid, $this->sid
+//                ),
+//                'stream_sub' => sprintf(
+//                    '%s/get_video?channel=%s&container=rtsp&stream=sub&sid=%s',
+//                    $this->baseUrl, $guid, $this->sid
+//                ),
+//                'extra_data' => [
+//                    'settings' => $channelSettings,
+//                    'state' => $objectState,
+//                    'raw_object' => $obj,
+//                ],
+//            ];
+            $password = urlencode($this->dvr->sdk_password ?? $this->dvr->password ?? '');
+
             $camData = [
                 'guid' => $guid,
                 'name' => $name,
                 'status' => ($objectState['online'] ?? false) ? Camera::STATUS_ONLINE : Camera::STATUS_OFFLINE,
                 'stream_main' => sprintf(
-                    '%s/get_video?channel=%s&container=rtsp&stream=main&sid=%s',
-                    $this->baseUrl, $guid, $this->sid
+                    '%s/get_video?channel=%s&container=rtsp&stream=main&password=%s',
+                    $this->baseUrl, $guid, $password
                 ),
                 'stream_sub' => sprintf(
-                    '%s/get_video?channel=%s&container=rtsp&stream=sub&sid=%s',
-                    $this->baseUrl, $guid, $this->sid
+                    '%s/get_video?channel=%s&container=rtsp&stream=sub&password=%s',
+                    $this->baseUrl, $guid, $password
                 ),
                 'extra_data' => [
                     'settings' => $channelSettings,

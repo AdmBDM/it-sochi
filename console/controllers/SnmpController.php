@@ -161,7 +161,8 @@ class SnmpController extends Controller
             $processed++;
 
             // Прогресс каждые 50 адресов
-            if ($processed % 50 === 0) {
+//            if ($processed % 50 === 0) {
+            if ($processed % 64 === 0) {
                 $percent = round($processed / $total * 100);
                 $this->stdout("\rProgress: $processed/$total ($percent%) | Found: " . count($found));
             }
@@ -169,15 +170,26 @@ class SnmpController extends Controller
             // SNMP-запрос с таймаутом 300ms
             $descr = @snmpget($ip, 'public', '1.3.6.1.2.1.1.1.0', 300000, 1);
 
-            if ($descr && preg_match('/(printer|kyocera|hp|brother|canon|xerox|ricoh|epson|tsc|barcode|label|zebra|godex|argox|te210|te310|ttp|tdp)/i', $descr)) {
+            // Исключаем роутеры и сетевое оборудование по описанию
+            if ($descr && preg_match('/(routeros|mikrotik|cisco|ubiquiti|unifi|tp-link|d-link|netgear|juniper|fortinet|pfsense|opnsense|synology|qnap|asus|huawei|zyxel)/i', $descr)) {
+                continue;
+            }
+
+            if ($descr && preg_match('/(printer|print|mfp|copier|fax|scanner|kyocera|hp|hewlett|brother|canon|xerox|ricoh|epson|tsc|zebra|godex|argox|dymo|sato|datamax|intermec|honeywell|toshiba|samsung|lexmark|dell|konica|minolta|sharp|panasonic|oki|fuji|phaser|workcentre|ecosys|laserjet|deskjet|officejet|pixma|imageclass|label|barcode|receipt|thermal|pos|ttp|te|tdp)/i', $descr)) {
                 $name = @snmpget($ip, 'public', '1.3.6.1.2.1.1.5.0', 300000, 1);
+                $name = $name ? trim($name, '"') : 'Unknown';
+                if (empty($name)) {
+                    $name = gethostbyaddr($ip);
+                    if ($name === $ip) $name = '';
+                }
 
                 // ← ДОБАВЛЯЕМ идентификаторы
                 $ids = $this->getPrinterIdentifiers($ip);
 
                 $printer = [
                     'ip' => $ip,
-                    'name' => $name ? trim($name, '"') : 'Unknown',
+//                    'name' => $name ? trim($name, '"') : 'Unknown',
+                    'name' => $name,
                     'descr' => trim($descr, '"'),
                     'mac' => $ids['mac'],        // ←
                     'serial' => $ids['serial'],  // ←
@@ -248,11 +260,38 @@ class SnmpController extends Controller
                 }
             }
 
+            // Полоритет имени: SNMP → MikroTik DHCP → DNS
+            $ip = $printer['ip'];
+            $name = @snmpget($ip, 'public', '1.3.6.1.2.1.1.5.0', 300000, 1);
+            $name = $name ? trim($name, '"') : '';
+
+            // Fallback на MikroTik DHCP, если SNMP-имя пустое
+            if (empty($name)) {
+                $mikrotikName = $this->getHostnameFromMikrotik($ip);
+                if ($mikrotikName) {
+                    $name = $mikrotikName;
+                }
+            }
+
+            // Fallback на DNS, если и MikroTik не дал имя
+            if (empty($name)) {
+                $dnsName = gethostbyaddr($ip);
+                if ($dnsName !== $ip) {
+                    $name = $dnsName;
+                }
+            }
+
             // Прямое присвоение вместо attributes()
             $model->ip = $printer['ip'];
             $model->mac_address = $printer['mac'] ?? $ids['mac'];
             $model->serial_snmp = $printer['serial'] ?? $ids['serial'];
-            $model->snmp_name = $printer['name'];
+//            $model->snmp_name = $printer['name'];
+            if (!empty($name)) {
+                $model->snmp_name = $name;
+            } elseif (empty($model->snmp_name)) {
+                // Только если и старое пустое — оставляем пустым
+                $model->snmp_name = null;
+            }
             $model->snmp_descr = $printer['descr'];
             $model->guessed_model = $this->guessModel($printer['descr']);
             $model->discovered_at = date('Y-m-d H:i:s');
@@ -273,12 +312,50 @@ class SnmpController extends Controller
     }
 
     /**
+     * Получает имя хоста из MikroTik DHCP lease по IP
+     * @param string $ip
+     * @return string|null
+     */
+    private function getHostnameFromMikrotik(string $ip): ?string
+    {
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            return null;
+        }
+
+        $cmd = 'ssh admbdm@192.168.88.1 "/ip dhcp-server lease print detail where address=' . $ip . '" 2>/dev/null';
+
+        $output = shell_exec($cmd);
+        if (empty($output) || str_contains($output, 'syntax error') || str_contains($output, 'bad command')) {
+            return null;
+        }
+
+        // Парсим host-name="..." из вывода
+        if (preg_match('/host-name="([^"]+)"/i', $output, $m)) {
+            return trim($m[1]);
+        }
+
+        return null;
+    }
+
+    /**
      * @param string $descr
      * @return string|null
      */
     private function guessModel(string $descr): ?string
     {
         $patterns = [
+//            '/Kyocera\s+(ECOSYS\s+[A-Z0-9]+)/i' => '$1',
+//            '/Kyocera\s+([A-Z0-9]+)/i' => 'Kyocera $1',
+//            '/HP\s+(LaserJet\s+\w+|M\d+[a-z]*)/i' => 'HP $1',
+//            '/Hewlett-Packard.*(LaserJet|MFP|M\d+)/i' => 'HP $1',
+//            '/Brother\s+(HL-[A-Z0-9]+|DCP-[A-Z0-9]+|MFC-[A-Z0-9]+)/i' => 'Brother $1',
+//            '/Brother\s+([A-Z0-9]+)/i' => 'Brother $1',
+//            '/Canon\s+(i-SENSYS\s+[A-Z0-9]+|LBP\d+|MF\d+)/i' => 'Canon $1',
+//            '/Xerox\s+(Phaser\s+\d+|WorkCentre\s+\d+)/i' => 'Xerox $1',
+//            '/Ricoh\s+(SP\s+\d+|MP\s+\w+)/i' => 'Ricoh $1',
+//            '/Epson\s+(WorkForce|AcuLaser\s+\w+)/i' => 'Epson $1',
+//            '/TSC\s+(TE\d+|TTP\d+|TDP\d+)/i' => 'TSC $1',
+//            '/Barcode\s+Printer/i' => 'Barcode Printer',
             '/Kyocera\s+(ECOSYS\s+[A-Z0-9]+)/i' => '$1',
             '/Kyocera\s+([A-Z0-9]+)/i' => 'Kyocera $1',
             '/HP\s+(LaserJet\s+\w+|M\d+[a-z]*)/i' => 'HP $1',
@@ -290,7 +367,24 @@ class SnmpController extends Controller
             '/Ricoh\s+(SP\s+\d+|MP\s+\w+)/i' => 'Ricoh $1',
             '/Epson\s+(WorkForce|AcuLaser\s+\w+)/i' => 'Epson $1',
             '/TSC\s+(TE\d+|TTP\d+|TDP\d+)/i' => 'TSC $1',
+            '/(TE\d+|TTP\d+|TDP\d+)\s+Version/i' => 'TSC $1',
+            '/Zebra\s+(ZT\d+|GX\d+|ZD\d+|LP\d+|TLP\d+)/i' => 'Zebra $1',
+            '/Zebra/i' => 'Zebra',
+            '/Godex\s+(EZ\d+|G\d+|RT\d+)/i' => 'Godex $1',
+            '/Godex/i' => 'Godex',
+            '/Argox\s+(OS-\d+|CP-\d+|F1|X\d+)/i' => 'Argox $1',
+            '/Argox/i' => 'Argox',
+            '/Dymo\s+(\w+)/i' => 'Dymo $1',
+            '/Dymo/i' => 'Dymo',
+            '/Sato\s+(CL\d+|GL\d+|GT\d+|LM\d+)/i' => 'Sato $1',
+            '/Sato/i' => 'Sato',
+            '/Datamax\s+([A-Z0-9-]+)/i' => 'Datamax $1',
+            '/Intermec\s+([A-Z0-9-]+)/i' => 'Intermec $1',
+            '/Honeywell\s+([A-Z0-9-]+)/i' => 'Honeywell $1',
             '/Barcode\s+Printer/i' => 'Barcode Printer',
+            '/Thermal\s+Printer/i' => 'Thermal Printer',
+            '/Label\s+Printer/i' => 'Label Printer',
+            '/Receipt\s+Printer/i' => 'Receipt Printer',
         ];
 
         foreach ($patterns as $regex => $replacement) {
