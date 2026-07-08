@@ -5,6 +5,7 @@ namespace backend\controllers;
 use Throwable;
 use Yii;
 use common\controllers\SochiMainController;
+use common\models\Building;
 use common\models\Location;
 use common\models\Workplace;
 use common\models\search\WorkplaceSearch;
@@ -151,6 +152,103 @@ class WorkplaceController extends SochiMainController
                 'name' => $loc->building->name . ' — эт.' . $loc->floor . ($loc->room ? ' — ' . $loc->room : '')
             ];
         }, $locations);
+    }
+
+    /**
+     * Возвращает список помещений (room)
+     * для выбранного здания и подразделения.
+     *
+     * @return array
+     */
+    public function actionRoomList(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $buildingId = Yii::$app->request->post('building_id');
+        $departmentId = Yii::$app->request->post('department_id');
+
+        if (!$buildingId || !$departmentId) {
+            return [];
+        }
+
+        $rooms = Location::find()
+            ->alias('l')
+            ->innerJoin(
+                Workplace::tableName() . ' w',
+                'w.location_id = l.id'
+            )
+            ->where([
+                'l.building_id' => $buildingId,
+//                'w.department_id' => $departmentId,
+                'l.is_active' => true,
+            ])
+            ->andWhere(['is not', 'l.room', null])
+            ->select(['l.room'])
+            ->distinct()
+            ->orderBy([
+                'l.room' => SORT_ASC,
+            ])
+            ->column();
+
+        return array_map(
+            fn($room) => [
+                'id' => $room,
+                'name' => $room,
+            ],
+            $rooms
+        );
+    }
+
+    /**
+     * Возвращает этажи выбранного помещения.
+     *
+     * Одновременно возвращается location_id.
+     *
+     * @return array
+     */
+    public function actionFloorList(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $buildingId = Yii::$app->request->post('building_id');
+//        $departmentId = Yii::$app->request->post('department_id');
+        $room = Yii::$app->request->post('room');
+
+//        if (!$buildingId || !$departmentId || !$room) {
+        if (!$buildingId || !$room) {
+            return [];
+        }
+
+        $locations = Location::find()
+            ->alias('l')
+            ->innerJoin(
+                Workplace::tableName() . ' w',
+                'w.location_id = l.id'
+            )
+            ->where([
+                'l.building_id' => $buildingId,
+//                'w.department_id' => $departmentId,
+                'l.room' => $room,
+                'l.is_active' => true,
+            ])
+            ->select([
+                'l.id',
+                'l.floor',
+            ])
+            ->distinct()
+            ->orderBy([
+                'l.floor' => SORT_ASC,
+            ])
+            ->asArray()
+            ->all();
+
+        return array_map(
+            static fn(array $item) => [
+                'id' => (int)$item['id'],
+                'name' => $item['floor'],
+            ],
+            $locations
+        );
     }
 
 }

@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -11,26 +10,34 @@ use yii\db\ActiveRecord;
  * @property int|null $employee_id
  * @property int|null $department_id
  * @property int|null $location_id
- * @property string|null $note
- * @property string $created_at
- * @property string $updated_at
+ * @property string|null $comment
+ * @property string|null $created_at
+ * @property string|null $updated_at
  * @property string $name
+ *
+ * Виртуальные атрибуты формы
+ * @property int|null $building_id
+ * @property string|null $room
+ * @property string|null $floor
  *
  * @property Employee|null $employee
  * @property Department|null $department
  * @property Location|null $location
- * @property Device[] $devices
+ * @property Device[] $device
  * @property Movement[] $movementsFrom
  * @property Movement[] $movementsTo
- */
-
-/**
- * Workplace — модель для рабочего места.
  */
 class Workplace extends ActiveRecord
 {
     /**
-     * @return string
+     * Виртуальные поля формы.
+     */
+    public ?int $building_id = null;
+    public ?string $room = null;
+    public ?string $floor = null;
+
+    /**
+     * @inheritdoc
      */
     public static function tableName(): string
     {
@@ -38,37 +45,64 @@ class Workplace extends ActiveRecord
     }
 
     /**
-     * @return array
+     * @inheritdoc
      */
     public function rules(): array
     {
         return [
-            [['employee_id', 'department_id', 'location_id'], 'integer'],
+            [['employee_id', 'department_id', 'location_id', 'building_id'], 'integer'],
             [['comment'], 'string'],
+            [['room', 'floor'], 'safe'],
             [['name'], 'string', 'max' => 255],
-            [['employee_id', 'location_id', 'department_id', 'name'], 'required'],
-            [['employee_id'], 'exist', 'targetClass' => Employee::class, 'targetAttribute' => 'id'],
-            [['department_id'], 'exist', 'targetClass' => Department::class, 'targetAttribute' => 'id'],
-            [['location_id'], 'exist', 'targetClass' => Location::class, 'targetAttribute' => 'id'],
+            [['employee_id', 'department_id', 'location_id', 'name'], 'required'],
+            [['employee_id'], 'exist',
+                'targetClass' => Employee::class,
+                'targetAttribute' => 'id'
+            ],
+            [['department_id'], 'exist',
+                'targetClass' => Department::class,
+                'targetAttribute' => 'id'
+            ],
+            [['location_id'], 'exist',
+                'targetClass' => Location::class,
+                'targetAttribute' => 'id'
+            ],
             [['created_at', 'updated_at'], 'safe'],
         ];
     }
 
     /**
-     * @return string[]
+     * @inheritdoc
      */
     public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
             'employee_id' => 'Сотрудник',
-            'department_id' => 'Отдел',
+            'department_id' => 'Подразделение',
+            'building_id' => 'Здание',
+            'room' => 'Помещение',
+            'floor' => 'Этаж',
             'location_id' => 'Расположение',
             'name' => 'Название',
             'comment' => 'Комментарий',
             'created_at' => 'Создано',
             'updated_at' => 'Обновлено',
         ];
+    }
+
+    /**
+     * Заполняет виртуальные поля после загрузки модели.
+     */
+    public function afterFind(): void
+    {
+        parent::afterFind();
+
+        if ($this->location !== null) {
+            $this->building_id = $this->location->building_id;
+            $this->room = $this->location->room;
+            $this->floor = $this->location->floor;
+        }
     }
 
     /**
@@ -96,6 +130,14 @@ class Workplace extends ActiveRecord
     }
 
     /**
+     * Здание определяется через Location.
+     */
+    public function getBuilding(): ?Building
+    {
+        return $this->location?->building;
+    }
+
+    /**
      * @return ActiveQuery
      */
     public function getDevice(): ActiveQuery
@@ -120,20 +162,17 @@ class Workplace extends ActiveRecord
     }
 
     /**
-     * @return ActiveQuery
-     */
-    public function getBuilding(): ActiveQuery
-    {
-        return $this->hasOne(Building::class, ['id' => 'building_id']);
-    }
-
-    /**
-     * @return string
+     * Человекочитаемое название рабочего места.
      */
     public function getLabel(): string
     {
-        $building = $this->building->name ?? '';
-        return "{$this->room} — {$this->floor} этаж, {$building}";
-    }
+        $building = $this->building?->name ?? '';
 
+        return trim(
+            ($this->room ?: '-') .
+            ' — этаж ' .
+            ($this->floor ?: '-') .
+            ($building ? " ({$building})" : '')
+        );
+    }
 }
