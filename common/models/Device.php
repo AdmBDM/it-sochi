@@ -2,8 +2,8 @@
 
 namespace common\models;
 
-use PrinterPageCounter;
-use PrinterRepair;
+use common\models\PrinterPageCounter;
+use common\models\PrinterRepair;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -19,6 +19,8 @@ use yii\db\ActiveRecord;
  * @property string|null $inventory_number
  * @property string|null $name
  * @property string|null $comment
+ * @property string|null $mac_address
+ * @property string|null $printer_metrics
  * @property string $created_at
  * @property string $updated_at
  *
@@ -26,6 +28,7 @@ use yii\db\ActiveRecord;
  * @property DeviceStatus $status
  * @property Workplace $workplace
  * @property Movement[] $movements
+ * @property DiscoveredPrinter[] $discoveredPrinters
  */
 class Device extends ActiveRecord
 {
@@ -45,9 +48,11 @@ class Device extends ActiveRecord
         return [
             [['model_id', 'status_id', 'workplace_id'], 'required'],
             [['model_id', 'status_id', 'workplace_id'], 'integer'],
-            [['comment'], 'string'],
+            [['comment', 'printer_metrics'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
             [['serial_number', 'inventory_number', 'name'], 'string', 'max' => 255],
+            [['mac_address'], 'string', 'max' => 17],
+            [['mac_address'], 'match', 'pattern' => '/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/', 'message' => 'Неверный формат MAC-адреса'],
         ];
     }
 
@@ -65,6 +70,7 @@ class Device extends ActiveRecord
             'inventory_number' => 'Инвентарный номер',
             'name' => 'Название',
             'comment' => 'Комментарий',
+            'mac_address' => 'MAC-адрес',
             'created_at' => 'Создано',
             'updated_at' => 'Обновлено',
         ];
@@ -91,6 +97,15 @@ class Device extends ActiveRecord
     public function getMovements(): ActiveQuery
     {
         return $this->hasMany(Movement::class, ['device_id' => 'id']);
+    }
+
+    /**
+     * Связанные discovered_printers
+     * @return ActiveQuery
+     */
+    public function getDiscoveredPrinters(): ActiveQuery
+    {
+        return $this->hasMany(DiscoveredPrinter::class, ['matched_device_id' => 'id']);
     }
 
     // Дополнительные геттеры для вложенных данных

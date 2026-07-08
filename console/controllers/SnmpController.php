@@ -124,11 +124,12 @@ class SnmpController extends Controller
     }
 
     /**
-     * @param int $threads
+     * @param int $threads - период обновления
      *
      * @return int
+     * @throws Exception
      */
-    public function actionDiscoverNetwork(int $threads = 50): int
+    public function actionDiscoverNetwork(int $threads = 64): int
     {
         snmp_set_quick_print(true);
         snmp_set_enum_print(true);
@@ -139,14 +140,14 @@ class SnmpController extends Controller
 
         // Генерируем все IP /21
         $ips = [];
-        $initOct = 88;
-        $endOct = 95;
-        $initOct4 = 1;
-        $endOct4 = 254;
-//        $initOct = 90;
-//        $endOct = 90;
-//        $initOct4 = 200;
+//        $initOct = 88;
+//        $endOct = 95;
+//        $initOct4 = 1;
 //        $endOct4 = 254;
+        $initOct = 90;
+        $endOct = 90;
+        $initOct4 = 200;
+        $endOct4 = 254;
         for ($third = $initOct; $third <= $endOct; $third++) {
             for ($fourth = $initOct4; $fourth <= $endOct4; $fourth++) {
                 $ips[] = "192.168.$third.$fourth";
@@ -160,15 +161,17 @@ class SnmpController extends Controller
         foreach ($ips as $ip) {
             $processed++;
 
-            // Прогресс каждые 50 адресов
-//            if ($processed % 50 === 0) {
-            if ($processed % 64 === 0) {
+            // Прогресс каждые $threads адреса
+            if ($processed % $threads === 0) {
                 $percent = round($processed / $total * 100);
                 $this->stdout("\rProgress: $processed/$total ($percent%) | Found: " . count($found));
             }
 
             // SNMP-запрос с таймаутом 300ms
             $descr = @snmpget($ip, 'public', '1.3.6.1.2.1.1.1.0', 300000, 1);
+            if (!$descr) {
+                $descr = @snmp2_get($ip, 'public', '1.3.6.1.2.1.1.1.0', 300000, 1);
+            }
 
             // Исключаем роутеры и сетевое оборудование по описанию
             if ($descr && preg_match('/(routeros|mikrotik|cisco|ubiquiti|unifi|tp-link|d-link|netgear|juniper|fortinet|pfsense|opnsense|synology|qnap|asus|huawei|zyxel)/i', $descr)) {
@@ -178,6 +181,9 @@ class SnmpController extends Controller
             if ($descr && preg_match('/(printer|print|mfp|copier|fax|scanner|kyocera|hp|hewlett|brother|canon|xerox|ricoh|epson|tsc|zebra|godex|argox|dymo|sato|datamax|intermec|honeywell|toshiba|samsung|lexmark|dell|konica|minolta|sharp|panasonic|oki|fuji|phaser|workcentre|ecosys|laserjet|deskjet|officejet|pixma|imageclass|label|barcode|receipt|thermal|pos|ttp|te|tdp)/i', $descr)) {
                 $name = @snmpget($ip, 'public', '1.3.6.1.2.1.1.5.0', 300000, 1);
                 $name = $name ? trim($name, '"') : 'Unknown';
+                if (!$name) {
+                    $name = @snmp2_get($ip, 'public', '1.3.6.1.2.1.1.5.0', 300000, 1);
+                }
                 if (empty($name)) {
                     $name = gethostbyaddr($ip);
                     if ($name === $ip) $name = '';
@@ -294,7 +300,8 @@ class SnmpController extends Controller
             }
             $model->snmp_descr = $printer['descr'];
             $model->guessed_model = $this->guessModel($printer['descr']);
-            $model->discovered_at = date('Y-m-d H:i:s');
+//            $model->discovered_at = date('Y-m-d H:i:s');
+            $model->last_seen_at = date('Y-m-d H:i:s');
             $model->source = $source ?? '---';
             $model->is_local = false;
 
@@ -344,18 +351,6 @@ class SnmpController extends Controller
     private function guessModel(string $descr): ?string
     {
         $patterns = [
-//            '/Kyocera\s+(ECOSYS\s+[A-Z0-9]+)/i' => '$1',
-//            '/Kyocera\s+([A-Z0-9]+)/i' => 'Kyocera $1',
-//            '/HP\s+(LaserJet\s+\w+|M\d+[a-z]*)/i' => 'HP $1',
-//            '/Hewlett-Packard.*(LaserJet|MFP|M\d+)/i' => 'HP $1',
-//            '/Brother\s+(HL-[A-Z0-9]+|DCP-[A-Z0-9]+|MFC-[A-Z0-9]+)/i' => 'Brother $1',
-//            '/Brother\s+([A-Z0-9]+)/i' => 'Brother $1',
-//            '/Canon\s+(i-SENSYS\s+[A-Z0-9]+|LBP\d+|MF\d+)/i' => 'Canon $1',
-//            '/Xerox\s+(Phaser\s+\d+|WorkCentre\s+\d+)/i' => 'Xerox $1',
-//            '/Ricoh\s+(SP\s+\d+|MP\s+\w+)/i' => 'Ricoh $1',
-//            '/Epson\s+(WorkForce|AcuLaser\s+\w+)/i' => 'Epson $1',
-//            '/TSC\s+(TE\d+|TTP\d+|TDP\d+)/i' => 'TSC $1',
-//            '/Barcode\s+Printer/i' => 'Barcode Printer',
             '/Kyocera\s+(ECOSYS\s+[A-Z0-9]+)/i' => '$1',
             '/Kyocera\s+([A-Z0-9]+)/i' => 'Kyocera $1',
             '/HP\s+(LaserJet\s+\w+|M\d+[a-z]*)/i' => 'HP $1',

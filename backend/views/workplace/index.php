@@ -27,7 +27,15 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel'  => $searchModel,
         'columns' => [
 //            ['class' => 'yii\grid\SerialColumn'],
-            ['class' => 'yii\grid\ActionColumn'],
+                [
+                        'class' => ActionColumn::class,
+//                        'class' => 'yii\grid\ActionColumn',
+//                        'options' => ['style'=>'width: 90px; a:not(:last-child) {margin-right: 7px;}'],
+                        'options' => ['style'=>'width: 90px; a {margin-right: 7px;}'],
+                        'urlCreator' => function ($action, Workplace $model, $key, $index, $column) {
+                            return Url::toRoute([$action, 'id' => $model->id]);
+                        }
+                ],
 //            'id',
             'name',
             [

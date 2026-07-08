@@ -22,11 +22,13 @@ use yii\db\Exception;
  * @property string|null $discovered_at Время первого обнаружения (timestamp от агента)
  * @property string $source           Источник обнаружения: 'snmp' | 'wmi'
  * @property bool $is_local          true = локальный принтер (WMI), false = сетевой (SNMP)
- * @property int|null $matched_device_id Ссылка на таблицу devices (ручное сопоставление)
+ * @property int|null $matched_device_id Ссылка на таблицу devices
  * @property string|null $last_seen_at Время последнего обнаружения
  * @property string|null $mac_address  MAC-адрес (для сетевых принтеров)
  * @property string|null $serial_snmp  Серийный номер из SNMP
  * @property string|null $last_ip      Последний известный IP (для сетевых)
+ *
+ * @property Device|null $device
  */
 
 class DiscoveredPrinter extends ActiveRecord
@@ -58,6 +60,7 @@ class DiscoveredPrinter extends ActiveRecord
             [['matched_device_id'], 'integer'],
             [['matched_device_id'], 'exist', 'skipOnError' => true, 'targetClass' => Device::class, 'targetAttribute' => ['matched_device_id' => 'id']],
             [['mac_address'], 'string', 'max' => 17],
+            [['mac_address'], 'match', 'pattern' => '/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/', 'message' => 'Неверный формат MAC-адреса'],
             [['serial_snmp'], 'string', 'max' => 100],
             [['last_ip'], 'string', 'max' => 15],
         ];
@@ -97,16 +100,42 @@ class DiscoveredPrinter extends ActiveRecord
     }
 
     /**
-     * Автосопоставление по IP
+     * Автосопоставление по MAC-адресу
      *
      * @return bool
      * @throws Exception
      */
-    public function tryMatchByIp(): bool
+    public function tryMatchByMac(): bool
     {
+        if (empty($this->mac_address)) {
+            return false;
+        }
+
         $device = Device::find()
-            ->where(['snmp_ip' => $this->ip])
-            ->orWhere(['LIKE', 'comment', $this->ip]) // fallback
+            ->where(['mac_address' => $this->mac_address])
+            ->one();
+
+        if ($device) {
+            $this->matched_device_id = $device->id;
+            return $this->save(false, ['matched_device_id']);
+        }
+        return false;
+    }
+
+    /**
+     * Автосопоставление по серийному номеру
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function tryMatchBySerial(): bool
+    {
+        if (empty($this->serial_snmp) || preg_match('/^0+$/', $this->serial_snmp)) {
+            return false;
+        }
+
+        $device = Device::find()
+            ->where(['serial_number' => $this->serial_snmp])
             ->one();
 
         if ($device) {

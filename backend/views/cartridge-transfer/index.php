@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'updated_at',
             //'is_active:boolean',
             [
-                'class' => ActionColumn::className(),
+                'class' => ActionColumn::class,
                 'urlCreator' => function ($action, CartridgeTransfer $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
                  }
