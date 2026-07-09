@@ -132,8 +132,10 @@ use yii\widgets\ActiveForm;
 
 <?php
 
-$roomUrl = Url::to(['/workplace/room-list']);
-$floorUrl = Url::to(['/workplace/floor-list']);
+//$roomUrl = Url::to(['/workplace/room-list']);
+//$floorUrl = Url::to(['/workplace/floor-list']);
+$roomUrl = Url::to(['/workplace/location-room-list']);
+$floorUrl = Url::to(['/workplace/location-floor-list']);
 
 $csrfParam = Yii::$app->request->csrfParam;
 $csrfToken = Yii::$app->request->csrfToken;

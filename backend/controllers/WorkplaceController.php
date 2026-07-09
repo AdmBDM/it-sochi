@@ -156,7 +156,8 @@ class WorkplaceController extends SochiMainController
 
     /**
      * Возвращает список помещений (room)
-     * для выбранного здания и подразделения.
+     * для выбранного здания и подразделения
+     * и в которых созданы рабочие места
      *
      * @return array
      */
@@ -200,7 +201,8 @@ class WorkplaceController extends SochiMainController
     }
 
     /**
-     * Возвращает этажи выбранного помещения.
+     * Возвращает этажи выбранного помещения,
+     * где созданы рабочие места
      *
      * Одновременно возвращается location_id.
      *
@@ -246,6 +248,87 @@ class WorkplaceController extends SochiMainController
             static fn(array $item) => [
                 'id' => (int)$item['id'],
                 'name' => $item['floor'],
+            ],
+            $locations
+        );
+    }
+
+    /**
+     * Возвращает список помещений выбранного здания.
+     * Используется при создании/редактировании рабочего места.
+     *
+     * Источник данных — таблица locations.
+     *
+     * @return array
+     */
+    public function actionLocationRoomList(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $buildingId = Yii::$app->request->post('building_id');
+
+        if (!$buildingId) {
+            return [];
+        }
+
+        $rooms = Location::find()
+            ->where([
+                'building_id' => $buildingId,
+                'is_active'   => true,
+            ])
+            ->andWhere(['is not', 'room', null])
+            ->select('room')
+            ->distinct()
+            ->orderBy([
+                'room' => SORT_ASC,
+            ])
+            ->column();
+
+        return array_map(
+            static fn(string $room) => [
+                'id'   => $room,
+                'name' => $room,
+            ],
+            $rooms
+        );
+    }
+
+    /**
+     * Возвращает список этажей выбранного помещения.
+     * Используется при создании/редактировании рабочего места.
+     *
+     * Источник данных — таблица locations.
+     *
+     * Возвращает location_id в качестве id элемента.
+     *
+     * @return array
+     */
+    public function actionLocationFloorList(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $buildingId = Yii::$app->request->post('building_id');
+        $room       = Yii::$app->request->post('room');
+
+        if (!$buildingId || !$room) {
+            return [];
+        }
+
+        $locations = Location::find()
+            ->where([
+                'building_id' => $buildingId,
+                'room'        => $room,
+                'is_active'   => true,
+            ])
+            ->orderBy([
+                'floor' => SORT_ASC,
+            ])
+            ->all();
+
+        return array_map(
+            static fn(Location $location) => [
+                'id'   => $location->id,
+                'name' => $location->floor,
             ],
             $locations
         );
