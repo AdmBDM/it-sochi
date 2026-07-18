@@ -55,9 +55,27 @@ class PrinterMatchController extends Controller
                     $dp->matched_device_id = $device->id;
                     $dp->save(false);
 
-                    // Обновляем mac_address в device, если пустой
+//                    // Обновляем mac_address в device, если пустой
+//                    if (empty($device->mac_address) && !empty($dp->mac_address)) {
+//                        $device->mac_address = $dp->mac_address;
+//                        $device->save(false);
+//                        $updated++;
+//                    }
+                    $changed = false;
+
+                    // MAC
                     if (empty($device->mac_address) && !empty($dp->mac_address)) {
                         $device->mac_address = $dp->mac_address;
+                        $changed = true;
+                    }
+
+                    // SNMP IP
+                    if (!empty($dp->ip) && $device->snmp_ip !== $dp->ip) {
+                        $device->snmp_ip = $dp->ip;
+                        $changed = true;
+                    }
+
+                    if ($changed) {
                         $device->save(false);
                         $updated++;
                     }

@@ -20,7 +20,8 @@
         "yiisoft/yii2-symfonymailer": "~2.0.3",
         "ext-simplexml": "*",
         "kartik-v/yii2-widget-depdrop": "@dev",
-        "ext-snmp": "*"
+        "ext-snmp": "*",
+        "ext-libxml": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
@@ -57,6 +58,11 @@
         "process-timeout": 1800,
         "fxp-asset": {
             "enabled": false
+        },
+        "audit": {
+            "ignore": [
+                "PKSA-z3gr-8qht-p93v"
+            ]
         }
     },
     "repositories": [
