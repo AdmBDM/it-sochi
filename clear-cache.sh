@@ -15,16 +15,18 @@ rm -rf /var/www/it-sochi/backend/web/assets/*
 echo "Кэш Yii2 очищен"
 
 # Перезапуск PHP-FPM
-PHP_FPM=$(systemctl list-units --type=service --state=running | grep -oE 'php[0-9.]+-fpm' | head -1)
-if [ -n "$PHP_FPM" ]; then
-    systemctl restart $PHP_FPM
-    echo "Перезапущен: $PHP_FPM"
-else
-    systemctl restart php-fpm 2>/dev/null || echo "PHP-FPM не найден"
-fi
+#PHP_FPM=$(systemctl list-units --type=service --state=running | grep -oE 'php[0-9.]+-fpm' | head -1)
+#if [ -n "$PHP_FPM" ]; then
+#    systemctl restart $PHP_FPM
+#    echo "Перезапущен: $PHP_FPM"
+#else
+#    systemctl restart php-fpm 2>/dev/null || echo "PHP-FPM не найден"
+#fi
+sudo systemctl restart php8.4-fpm
+echo "Перезапущен: php8.4-fpm"
 
 # Перезапуск nginx
-systemctl restart nginx
+sudo systemctl restart nginx
 echo "Nginx перезапущен"
 
 echo "=== Готово! ==="

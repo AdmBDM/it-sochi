@@ -159,6 +159,7 @@ class SnmpController extends Controller
         $total = count($ips);
         $found = [];
         $processed = 0;
+        $snmp = new SnmpClient();
 
         foreach ($ips as $ip) {
             $processed++;
@@ -192,7 +193,8 @@ class SnmpController extends Controller
                 }
 
                 // ← ДОБАВЛЯЕМ идентификаторы
-                $ids = $this->getPrinterIdentifiers($ip);
+//                $ids = $this->getPrinterIdentifiers($ip);
+                $ids = $snmp->getPrinterIdentifiers($ip);
 
                 $printer = [
                     'ip' => $ip,
@@ -228,6 +230,8 @@ class SnmpController extends Controller
      */
     private function saveDiscovered(array $found, string $source): void
     {
+        $snmp = new SnmpClient();
+
         $reportFile = Yii::getAlias("@runtime/printers_discovered_{$source}_" . date('Ymd_His') . '.json');
         file_put_contents($reportFile, json_encode($found, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
@@ -236,7 +240,8 @@ class SnmpController extends Controller
         $updatedCount = 0;
 
         foreach ($found as $printer) {
-            $ids = $this->getPrinterIdentifiers($printer['ip']);
+//            $ids = $this->getPrinterIdentifiers($printer['ip']);
+            $ids = $snmp->getPrinterIdentifiers($printer['ip']);
 
             // Ищем по приоритету: MAC → Serial → IP
             $model = null;
@@ -398,41 +403,41 @@ class SnmpController extends Controller
      *
      * @return null[]
      */
-    private function getPrinterIdentifiers(string $ip): array
-    {
-        $result = [
-            'mac' => null,
-            'serial' => null,
-        ];
-
-        // 1. MAC через ARP (надёжнее SNMP для MAC)
-        $arp = shell_exec("ip neigh show $ip 2>/dev/null");
-        if (preg_match('/([0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2})/i', $arp, $m)) {
-            $result['mac'] = strtolower($m[1]);
-        }
-
-        // 2. Серийный номер через SNMP
-        // prtGeneralSerialNumber (стандарт Printer MIB)
-        $oids = [
-            '1.3.6.1.2.1.43.5.1.1.17.1',      // стандартный
-            '1.3.6.1.4.1.1347.43.5.1.1.28.1',  // Kyocera
-            '1.3.6.1.4.1.11.2.3.9.4.2.1.1.3.0', // HP
-            '1.3.6.1.4.1.2435.2.3.9.4.2.1.5.5.1.0', // Brother
-        ];
-
-        foreach ($oids as $oid) {
-            $raw = @snmpget($ip, 'public', $oid, 200000, 1);
-            if ($raw) {
-                $serial = trim($raw, '" ');
-                if (!empty($serial) && $serial !== 'NULL') {
-                    $result['serial'] = $serial;
-                    break;
-                }
-            }
-        }
-
-        return $result;
-    }
+//    private function getPrinterIdentifiers(string $ip): array
+//    {
+//        $result = [
+//            'mac' => null,
+//            'serial' => null,
+//        ];
+//
+//        // 1. MAC через ARP (надёжнее SNMP для MAC)
+//        $arp = shell_exec("ip neigh show $ip 2>/dev/null");
+//        if (preg_match('/([0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2})/i', $arp, $m)) {
+//            $result['mac'] = strtolower($m[1]);
+//        }
+//
+//        // 2. Серийный номер через SNMP
+//        // prtGeneralSerialNumber (стандарт Printer MIB)
+//        $oids = [
+//            '1.3.6.1.2.1.43.5.1.1.17.1',      // стандартный
+//            '1.3.6.1.4.1.1347.43.5.1.1.28.1',  // Kyocera
+//            '1.3.6.1.4.1.11.2.3.9.4.2.1.1.3.0', // HP
+//            '1.3.6.1.4.1.2435.2.3.9.4.2.1.5.5.1.0', // Brother
+//        ];
+//
+//        foreach ($oids as $oid) {
+//            $raw = @snmpget($ip, 'public', $oid, 200000, 1);
+//            if ($raw) {
+//                $serial = trim($raw, '" ');
+//                if (!empty($serial) && $serial !== 'NULL') {
+//                    $result['serial'] = $serial;
+//                    break;
+//                }
+//            }
+//        }
+//
+//        return $result;
+//    }
 
     /**
      * Опрос счётчиков страниц сетевых принтеров.
