@@ -3,12 +3,22 @@
 namespace common\services\snmp\discovery;
 
 use common\models\DiscoveredPrinter;
+use common\services\output\NullOutput;
+use common\services\output\OutputInterface;
 use common\services\snmp\SnmpClient;
 use Yii;
 use yii\db\Exception;
 
 class DiscoveryService
 {
+    /**
+     * @param OutputInterface $output
+     */
+    public function __construct(
+        private readonly OutputInterface $output = new NullOutput()
+    ) {
+    }
+
     /**
      * Определение предполагаемой модели устройства по sysDescr.
      *
@@ -103,7 +113,6 @@ class DiscoveryService
         $updatedCount = 0;
 
         foreach ($found as $printer) {
-//            $ids = $this->getPrinterIdentifiers($printer['ip']);
             $ids = $snmp->getPrinterIdentifiers($printer['ip']);
 
             // Ищем по приоритету: MAC → Serial → IP
@@ -113,9 +122,6 @@ class DiscoveryService
                 $model = DiscoveredPrinter::findOne(['mac_address' => $ids['mac']]);
             }
 
-//            if (!$model && $ids['serial']) {
-//                $model = DiscoveredPrinter::findOne(['serial_snmp' => $ids['serial']]);
-//            }
             if (!$model && $ids['serial'] && !preg_match('/^0+$/', $ids['serial'])) {
                 $model = DiscoveredPrinter::findOne(['serial_snmp' => $ids['serial']]);
             }
@@ -161,7 +167,6 @@ class DiscoveryService
             $model->ip = $printer['ip'];
             $model->mac_address = $printer['mac'] ?? $ids['mac'];
             $model->serial_snmp = $printer['serial'] ?? $ids['serial'];
-//            $model->snmp_name = $printer['name'];
             if (!empty($name)) {
                 $model->snmp_name = $name;
             } elseif (empty($model->snmp_name)) {
@@ -170,22 +175,24 @@ class DiscoveryService
             }
             $model->snmp_descr = $printer['descr'];
             $model->guessed_model = $this->guessModel($printer['descr']);
-//            $model->discovered_at = date('Y-m-d H:i:s');
             $model->last_seen_at = date('Y-m-d H:i:s');
             $model->source = $source ?? '---';
             $model->is_local = false;
 
             if (!$model->save()) {
-                Yii::error("Failed to save {$printer['ip']}: " . json_encode($model->errors));
-                $this->stderr("FAIL {$printer['ip']}: " . json_encode($model->errors) . "\n");
-//            } else {
-//                $this->stdout("OK {$printer['ip']} id={$model->id}\n");
+//                Yii::error("Failed to save {$printer['ip']}: " . json_encode($model->errors));
+//                $this->output->error("FAIL {$printer['ip']}: " . json_encode($model->errors) . "\n");
+                $this->output->error(sprintf(
+                    "Failed to save %s: %s",
+                    $printer['ip'],
+                    json_encode($model->errors)
+                ));
             }
         }
 
-        $this->stdout("Saved to: $reportFile\n");
-        $this->stdout("Database: " . count($found) . " records\n");
-        $this->stdout("\nNew: $newCount, Updated: $updatedCount\n");
+        $this->output->success("Saved to: $reportFile");
+        $this->output->success("Database: " . count($found) . " records");
+        $this->output->success("New: $newCount, Updated: $updatedCount");
     }
 
 }
