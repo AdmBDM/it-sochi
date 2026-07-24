@@ -10,6 +10,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <ul>
+        <h3>Новый классификатор</h3>
+        <li><?= Html::a('Классификатор', ['/reference']) ?></li>
+
+        <hr>
         <h3>Основные таблицы</h3>
         <li><?= Html::a('Локации', ['/location']) ?></li>
         <li><?= Html::a('Рабочие места', ['/workplace']) ?></li>
