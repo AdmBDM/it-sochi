@@ -8,8 +8,9 @@ use common\controllers\SochiMainController;
 use common\models\ReferenceItem;
 use common\models\search\SearchReferenceItem;
 use Yii;
-use yii\web\Controller;
+use yii\db\Exception;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 /**
  * Контроллер управления универсальным классификатором ReferenceItem.
@@ -72,5 +73,36 @@ class ReferenceController extends SochiMainController
         ]);
     }
 
+    /**
+     * Создание элемента классификатора.
+     *
+     * @param int|null $parent_id
+     *
+     * @return string|Response
+     * @throws Exception
+     */
+    public function actionCreate(?int $parent_id = null): string|Response
+    {
+        $model = new ReferenceItem();
+        $model->parent_id = $parent_id;
+        $model->sort_order = 0;
+        $model->is_active = true;
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect([
+                'index',
+                'id' => $model->parent_id,
+            ]);
+        }
+
+        $parent = $parent_id !== null
+            ? ReferenceItem::findOne($parent_id)
+            : null;
+
+        return $this->render('create', [
+            'model' => $model,
+            'parent' => $parent,
+        ]);
+    }
 
 }

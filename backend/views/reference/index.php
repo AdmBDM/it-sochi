@@ -28,12 +28,15 @@ $this->params['breadcrumbs'][] = $this->title;
         <h1 class="mb-0"><?= Html::encode($this->title) ?></h1>
 
         <div>
-            <?= Html::button(
-                'Создать',
-                [
-                    'class' => 'btn btn-success',
-                    'disabled' => true,
-                ]
+            <?= Html::a(
+                    'Создать',
+                    [
+                            'create',
+                            'parent_id' => $selectedNode?->id,
+                    ],
+                    [
+                            'class' => 'btn btn-success',
+                    ]
             ) ?>
         </div>
     </div>
