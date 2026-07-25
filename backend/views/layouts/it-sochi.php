@@ -23,6 +23,7 @@ $this->registerCssFile('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= Html::encode($this->title) ?></title>
 <!--    <link rel="icon" type="image/svg+xml" href="/favicon.svg">-->
+    <?php $this->registerCsrfMetaTags() ?>
     <?php $this->head() ?>
 </head>
 <body>
@@ -69,6 +70,9 @@ $this->registerCssFile('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font
             'activeItemTemplate' => "<li class=\"breadcrumb-item active\" aria-current=\"page\">{link}</li>\n",
             'links' => $this->params['breadcrumbs'] ?? [],
         ]) ?>
+
+        <?= $this->render('_flashes') ?>
+
         <?= $content ?>
     </div>
 </div>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use common\models\ReferenceItem;
 use common\models\search\SearchReferenceItem;
 use yii\data\ActiveDataProvider;
+use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\helpers\Html;
 
@@ -38,6 +39,42 @@ $this->params['breadcrumbs'][] = $this->title;
                             'class' => 'btn btn-success',
                     ]
             ) ?>
+
+            <?php if ($selectedNode !== null): ?>
+                <?= Html::a(
+                        'Редактировать',
+                        ['update', 'id' => $selectedNode->id],
+                        ['class' => 'btn btn-primary']
+                ) ?>
+                <?= Html::a(
+                        'Удалить',
+                        ['delete', 'id' => $selectedNode->id],
+                        [
+                                'class' => 'btn btn-danger',
+                                'data' => [
+                                        'confirm' => 'Пометить элемент как удалённый?',
+                                        'method' => 'post',
+                                ],
+                        ]
+                ) ?>
+
+            <?php else: ?>
+                <?= Html::button(
+                        'Редактировать',
+                        [
+                                'class' => 'btn btn-primary',
+                                'disabled' => true,
+                        ]
+                ) ?>
+                <?= Html::button(
+                        'Удалить',
+                        [
+                                'class' => 'btn btn-danger',
+                                'disabled' => true,
+                        ]
+                ) ?>
+
+            <?php endif; ?>
         </div>
     </div>
 
@@ -67,6 +104,48 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     'columns' => [
                             [
+                                    'class' => ActionColumn::class,
+                                    'header' => '',
+                                    'template' => '{up} {down}',
+                                    'contentOptions' => [
+                                            'class' => 'text-nowrap text-center',
+                                            'style' => 'width:70px',
+                                    ],
+                                    'buttons' => [
+
+                                            'up' => static function (string $url, $model): string {
+
+                                                return Html::a(
+                                                        '↑',
+                                                        [
+                                                                'move-up',
+                                                                'id' => $model->id,
+                                                        ],
+                                                        [
+                                                                'class' => 'btn btn-sm btn-outline-secondary',
+                                                                'title' => 'Переместить вверх',
+                                                        ]
+                                                );
+                                            },
+
+                                            'down' => static function (string $url, $model): string {
+
+                                                return Html::a(
+                                                        '↓',
+                                                        [
+                                                                'move-down',
+                                                                'id' => $model->id,
+                                                        ],
+                                                        [
+                                                                'class' => 'btn btn-sm btn-outline-secondary',
+                                                                'title' => 'Переместить вниз',
+                                                        ]
+                                                );
+                                            },
+                                    ],
+                            ],
+
+                            [
                                     'attribute' => 'code',
                                     'label' => 'Код',
                             ],
@@ -79,10 +158,10 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'label' => 'Тип',
                                     'value' => static fn (ReferenceItem $model): string => $model->type?->name ?? '',
                             ],
-                            [
-                                    'attribute' => 'sort_order',
-                                    'label' => 'Порядок',
-                            ],
+//                            [
+//                                    'attribute' => 'sort_order',
+//                                    'label' => 'Порядок',
+//                            ],
                             [
                                     'attribute' => 'is_active',
                                     'label' => 'Активна',

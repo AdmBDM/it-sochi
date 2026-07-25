@@ -9,6 +9,7 @@ use yii\widgets\ActiveForm;
 /**
  * @var yii\web\View $this
  * @var ReferenceItem $model
+ * @var array<int,string> $parentList
  */
 
 $form = ActiveForm::begin();
@@ -17,6 +18,13 @@ $form = ActiveForm::begin();
 <div class="card">
 
     <div class="card-body">
+        <?= $form->field($model, 'parent_id')->dropDownList(
+                $parentList,
+                [
+                        'prompt' => 'Корневой элемент',
+                ]
+        ) ?>
+
         <?= $form->field($model, 'name')->textInput([
                 'maxlength' => true,
                 'autocomplete' => 'off',
@@ -29,7 +37,7 @@ $form = ActiveForm::begin();
 
         <?= $form->field($model, 'type_id')->textInput() ?>
         <?= $form->field($model, 'description')->textarea(['rows' => 4,]) ?>
-        <?= $form->field($model, 'sort_order')->input('number') ?>
+<!--        --><?php //= $form->field($model, 'sort_order')->input('number') ?>
         <?= $form->field($model, 'is_active')->checkbox() ?>
 
     </div>

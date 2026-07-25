@@ -28,12 +28,33 @@ use yii\db\ActiveRecord;
  */
 class ReferenceItem extends ActiveRecord
 {
+    private const int SORT_STEP = 10;
+
     /**
      * @return string
      */
     public static function tableName(): string
     {
         return '{{%reference_items}}';
+    }
+
+    /**
+     * @return bool
+     */
+    public function beforeValidate(): bool
+    {
+        if (!parent::beforeValidate()) {
+            return false;
+        }
+
+        if (
+            $this->isNewRecord &&
+            (!$this->sort_order || $this->sort_order <= 0)
+        ) {
+            $this->sort_order = static::getNextSortOrder($this->parent_id);
+        }
+
+        return true;
     }
 
     /**
@@ -65,6 +86,7 @@ class ReferenceItem extends ActiveRecord
                 'targetClass' => self::class,
                 'targetAttribute' => ['type_id' => 'id'],
             ],
+            ['parent_id', 'validateParent'],
         ];
     }
 
@@ -222,6 +244,110 @@ class ReferenceItem extends ActiveRecord
         }
 
         return $path;
+    }
+
+    /**
+     * Возвращает список элементов для выбора родителя.
+     *
+     * @param int|null $excludeId Исключаемый элемент.
+     *
+     * @return array<int, string>
+     */
+    public static function getParentList(?int $excludeId = null): array
+    {
+        $query = static::find()
+            ->where(['is_deleted' => false])
+            ->orderBy([
+                'sort_order' => SORT_ASC,
+                'name' => SORT_ASC,
+            ]);
+
+        if ($excludeId !== null) {
+            $query->andWhere(['<>', 'id', $excludeId]);
+        }
+
+        $items = [];
+
+        foreach ($query->all() as $item) {
+            $items[$item->id] = $item->name;
+        }
+
+        return $items;
+    }
+
+    /**
+     * Проверяет возможность изменения родителя.
+     *
+     * Запрещает назначать элемент своим родителем
+     * либо переносить его внутрь собственного поддерева.
+     *
+     * @param string $attribute
+     *
+     * @return void
+     */
+    public function validateParent(string $attribute): void
+    {
+        if ($this->$attribute === null || $this->isNewRecord) {
+            return;
+        }
+
+        if ($this->$attribute === $this->id) {
+            $this->addError(
+                $attribute,
+                'Элемент не может быть родителем самому себе.'
+            );
+            return;
+        }
+
+        $parent = static::findOne($this->$attribute);
+
+        while ($parent !== null) {
+
+            if ($parent->id === $this->id) {
+                $this->addError(
+                    $attribute,
+                    'Нельзя переместить элемент внутрь собственного поддерева.'
+                );
+                return;
+            }
+
+            $parent = $parent->parent;
+        }
+    }
+
+    /**
+     * Возвращает количество неудалённых дочерних элементов.
+     *
+     * @return int
+     */
+    public function getActiveChildrenCount(): int
+    {
+        return (int) static::find()
+            ->where([
+                'parent_id' => $this->id,
+                'is_deleted' => false,
+            ])
+            ->count();
+    }
+
+    /**
+     * Возвращает следующий порядковый номер
+     * среди дочерних элементов указанного родителя.
+     *
+     * @param int|null $parentId
+     *
+     * @return int
+     */
+    public static function getNextSortOrder(?int $parentId): int
+    {
+        $max = static::find()
+            ->where([
+                'parent_id' => $parentId,
+                'is_deleted' => false,
+            ])
+            ->max('sort_order');
+
+        return ((int)$max) + self::SORT_STEP;
     }
 
 }

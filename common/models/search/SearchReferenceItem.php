@@ -18,8 +18,9 @@ class SearchReferenceItem extends ReferenceItem
     public function rules(): array
     {
         return [
-            [['id', 'parent_id', 'type_id', 'sort_order'], 'integer'],
-            [['code', 'name'], 'safe'],
+//            [['id', 'parent_id', 'type_id', 'sort_order'], 'integer'],
+            [['id', 'parent_id', 'type_id'], 'integer'],
+            [['code', 'name', 'description'], 'safe'],
             [['is_active'], 'boolean'],
         ];
     }
@@ -66,14 +67,21 @@ class SearchReferenceItem extends ReferenceItem
             return $dataProvider;
         }
 
+//        $query->andFilterWhere([
+//            'id' => $this->id,
+//            'type_id' => $this->type_id,
+//            'is_active' => $this->is_active,
+//        ]);
         $query->andFilterWhere([
             'id' => $this->id,
+            'parent_id' => $this->parent_id,
             'type_id' => $this->type_id,
             'is_active' => $this->is_active,
         ]);
 
         $query->andFilterWhere(['ilike', 'code', $this->code]);
         $query->andFilterWhere(['ilike', 'name', $this->name]);
+        $query->andFilterWhere(['ilike', 'description', $this->description]);
 
         return $dataProvider;
     }
