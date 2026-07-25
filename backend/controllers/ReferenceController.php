@@ -89,6 +89,12 @@ class ReferenceController extends SochiMainController
         $model->is_active = true;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            if (Yii::$app->request->isAjax) {
+                return $this->asJson([
+                    'success' => true,
+                ]);
+            }
+
             return $this->redirect([
                 'index',
                 'id' => $model->parent_id,
@@ -99,11 +105,24 @@ class ReferenceController extends SochiMainController
             ? ReferenceItem::findOne($parent_id)
             : null;
 
+        $parentList = ReferenceItem::getParentList();
+        $typeList = ReferenceItem::getTypeList();
+
+        if (Yii::$app->request->isAjax) {
+
+            return $this->renderAjax('create', [
+                'model' => $model,
+                'parent' => $parent,
+                'parentList' => $parentList,
+                'typeList' => $typeList,
+            ]);
+        }
+
         return $this->render('create', [
             'model' => $model,
             'parent' => $parent,
-            'parentList' => ReferenceItem::getParentList(),
-            'typeList' => ReferenceItem::getTypeList(),
+            'parentList' => $parentList,
+            'typeList' => $typeList,
         ]);
     }
 
@@ -144,17 +163,43 @@ class ReferenceController extends SochiMainController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+
+            if (Yii::$app->request->isAjax) {
+
+                return $this->asJson([
+                    'success' => true,
+                ]);
+            }
+
             return $this->redirect([
                 'index',
                 'id' => $model->parent_id,
             ]);
         }
 
+        $parent = null;
+        if (!empty($model->parent_id)) {
+            $parent = ReferenceItem::findOne((int)$model->parent_id);
+        }
+
+        $parentList = ReferenceItem::getParentList($model->id);
+        $typeList = ReferenceItem::getTypeList();
+
+        if (Yii::$app->request->isAjax || Yii::$app->request->isPost) {
+
+            return $this->renderAjax('update', [
+                'model' => $model,
+                'parent' => $parent,
+                'parentList' => $parentList,
+                'typeList' => $typeList,
+            ]);
+        }
+
         return $this->render('update', [
             'model' => $model,
-            'parent' => $model->parent,
-            'parentList' => ReferenceItem::getParentList(),
-            'typeList' => ReferenceItem::getTypeList(),
+            'parent' => $parent,
+            'parentList' => $parentList,
+            'typeList' => $typeList,
         ]);
     }
 
@@ -182,9 +227,15 @@ class ReferenceController extends SochiMainController
                 )
             );
 
+            if (Yii::$app->request->isAjax) {
+                return $this->asJson([
+                    'success' => true,
+                ]);
+            }
+
             return $this->redirect([
                 'index',
-                'id' => $model->id,
+                'id' => $model->parent_id,
             ]);
         }
 

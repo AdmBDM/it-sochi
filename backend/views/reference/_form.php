@@ -13,7 +13,7 @@ use yii\widgets\ActiveForm;
  * @var $typeList
  */
 
-$form = ActiveForm::begin();
+$form = ActiveForm::begin(['id' => 'reference-form',]);
 ?>
 
 <div class="card">

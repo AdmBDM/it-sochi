@@ -51,7 +51,9 @@ class ReferenceItem extends ActiveRecord
             $this->isNewRecord &&
             (!$this->sort_order || $this->sort_order <= 0)
         ) {
-            $this->sort_order = static::getNextSortOrder($this->parent_id);
+            $this->sort_order = static::getNextSortOrder(
+                $this->parent_id === '' ? null : (int)$this->parent_id
+            );
         }
 
         return true;
@@ -340,12 +342,15 @@ class ReferenceItem extends ActiveRecord
      */
     public static function getNextSortOrder(?int $parentId): int
     {
-        $max = static::find()
-            ->where([
-                'parent_id' => $parentId,
-                'is_deleted' => false,
-            ])
-            ->max('sort_order');
+        $query = static::find()->andWhere(['is_deleted' => false,]);
+
+        if ($parentId === null) {
+            $query->andWhere(['parent_id' => null]);
+        } else {
+            $query->andWhere(['parent_id' => $parentId]);
+        }
+
+        $max = $query->max('sort_order');
 
         return ((int)$max) + self::SORT_STEP;
     }

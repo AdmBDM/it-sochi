@@ -31,12 +31,10 @@ $this->params['breadcrumbs'][] = $this->title;
         <div>
             <?= Html::a(
                     'Создать',
-                    [
-                            'create',
-                            'parent_id' => $selectedNode?->id,
-                    ],
+                    ['create', 'parent_id' => $selectedNode?->id],
                     [
                             'class' => 'btn btn-success',
+                            'id' => 'btn-create-reference',
                     ]
             ) ?>
 
@@ -44,17 +42,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= Html::a(
                         'Редактировать',
                         ['update', 'id' => $selectedNode->id],
-                        ['class' => 'btn btn-primary']
+                        [
+                                'class' => 'btn btn-primary',
+                                'id' => 'btn-update-reference',
+                        ]
                 ) ?>
                 <?= Html::a(
                         'Удалить',
                         ['delete', 'id' => $selectedNode->id],
                         [
                                 'class' => 'btn btn-danger',
-                                'data' => [
-                                        'confirm' => 'Пометить элемент как удалённый?',
-                                        'method' => 'post',
-                                ],
+                                'id' => 'btn-delete-reference',
+                                'data-name' => $selectedNode->name,
                         ]
                 ) ?>
 
@@ -183,3 +182,100 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
 </div>
+
+<div class="modal fade" id="reference-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content"></div>
+    </div>
+</div>
+
+
+<?php
+$this->registerJs(<<<JS
+
+$(document).on('click', '#btn-create-reference', function (e) {
+    e.preventDefault();
+
+    $('#reference-modal .modal-content').load($(this).attr('href'), function () {
+        $('#reference-modal').modal('show');
+    });
+});
+
+$(document).on('click', '#btn-update-reference', function (e) {
+    e.preventDefault();
+
+    $('#reference-modal .modal-content').load($(this).attr('href'), function () {
+        $('#reference-modal').modal('show');
+    });
+});
+
+$(document).on('click', '#btn-delete-reference', function (e) {
+
+    e.preventDefault();
+
+    const link = $(this);
+
+    if (!confirm(
+        'Удалить "' + link.data('name') + '"?'
+    )) {
+        return;
+    }
+
+    $.ajax({
+
+        url: link.attr('href'),
+        type: 'POST',
+
+        success: function (response) {
+
+            if (typeof response === 'object' && response.success) {
+
+                // $.pjax.reload({container: '#reference-grid-pjax'});
+
+                location.reload();
+            }
+
+        }
+
+    });
+
+});
+
+$(document).on('beforeSubmit', '#reference-form', function (e) {
+
+    e.preventDefault();
+
+    const form = $(this);
+
+    $.ajax({
+
+        url: form.attr('action'),
+        type: form.attr('method'),
+        data: form.serialize(),
+
+        success: function (response) {
+
+            if (typeof response === 'object' && response.success) {
+
+                bootstrap.Modal
+                    .getInstance(document.getElementById('reference-modal'))
+                    .hide();
+
+                // $.pjax.reload({container: '#reference-grid-pjax'});
+                location.reload();
+
+                return;
+            }
+            
+            $('#reference-modal .modal-content').html(response);
+
+        }
+
+    });
+
+    return false;
+
+});
+
+JS);
+?>
