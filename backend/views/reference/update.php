@@ -10,6 +10,7 @@ use yii\helpers\Html;
  * @var ReferenceItem $model
  * @var ReferenceItem|null $parent
  * @var array<int,string> $parentList
+ * @var $typeList
  */
 
 $this->title = 'Редактирование элемента';
@@ -36,6 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= $this->render('_form', [
         'model' => $model,
         'parentList' => $parentList,
+        'typeList' => $typeList,
     ]) ?>
 
 </div>

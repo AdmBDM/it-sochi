@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use common\models\ReferenceItem;
-use common\models\search\SearchReferenceItem;
+use common\models\search\ReferenceItemSearch;
 use yii\data\ActiveDataProvider;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
@@ -11,7 +11,7 @@ use yii\helpers\Html;
 
 /**
  * @var yii\web\View $this
- * @var SearchReferenceItem $searchModel
+ * @var ReferenceItemSearch $searchModel
  * @var ActiveDataProvider $dataProvider
  * @var ReferenceItem|null $selectedNode
  * @var array<int|null, ReferenceItem[]> $groupedTree
@@ -106,15 +106,13 @@ $this->params['breadcrumbs'][] = $this->title;
                             [
                                     'class' => ActionColumn::class,
                                     'header' => '',
-                                    'template' => '{up} {down}',
+                                    'template' => '{up} {down} {view}',
                                     'contentOptions' => [
                                             'class' => 'text-nowrap text-center',
                                             'style' => 'width:70px',
                                     ],
                                     'buttons' => [
-
                                             'up' => static function (string $url, $model): string {
-
                                                 return Html::a(
                                                         '↑',
                                                         [
@@ -129,7 +127,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                             },
 
                                             'down' => static function (string $url, $model): string {
-
                                                 return Html::a(
                                                         '↓',
                                                         [
@@ -139,6 +136,17 @@ $this->params['breadcrumbs'][] = $this->title;
                                                         [
                                                                 'class' => 'btn btn-sm btn-outline-secondary',
                                                                 'title' => 'Переместить вниз',
+                                                        ]
+                                                );
+                                            },
+
+                                            'view' => static function (string $url, ReferenceItem $model): string {
+                                                return Html::a(
+                                                        '<i class="bi bi-eye"></i>',
+                                                        ['view', 'id' => $model->id],
+                                                        [
+                                                                'class' => 'btn btn-sm btn-outline-primary',
+                                                                'title' => 'Просмотр',
                                                         ]
                                                 );
                                             },

@@ -6,7 +6,7 @@ namespace backend\controllers;
 
 use common\controllers\SochiMainController;
 use common\models\ReferenceItem;
-use common\models\search\SearchReferenceItem;
+use common\models\search\ReferenceItemSearch;
 use Yii;
 use yii\db\Exception;
 use yii\web\NotFoundHttpException;
@@ -50,7 +50,7 @@ class ReferenceController extends SochiMainController
             }
         }
 
-        $searchModel = new SearchReferenceItem();
+        $searchModel = new ReferenceItemSearch();
 
         $dataProvider = $searchModel->search(
             Yii::$app->request->queryParams,
@@ -103,6 +103,7 @@ class ReferenceController extends SochiMainController
             'model' => $model,
             'parent' => $parent,
             'parentList' => ReferenceItem::getParentList(),
+            'typeList' => ReferenceItem::getTypeList(),
         ]);
     }
 
@@ -153,6 +154,7 @@ class ReferenceController extends SochiMainController
             'model' => $model,
             'parent' => $model->parent,
             'parentList' => ReferenceItem::getParentList(),
+            'typeList' => ReferenceItem::getTypeList(),
         ]);
     }
 
@@ -310,6 +312,22 @@ class ReferenceController extends SochiMainController
         return $this->redirect([
             'index',
             'id' => $model->parent_id,
+        ]);
+    }
+
+    /**
+     * Просмотр элемента классификатора.
+     *
+     * @param int $id
+     *
+     * @return string
+     *
+     * @throws NotFoundHttpException
+     */
+    public function actionView(int $id): string
+    {
+        return $this->render('view', [
+            'model' => $this->findModel($id),
         ]);
     }
 

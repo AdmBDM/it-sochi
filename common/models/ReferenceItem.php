@@ -350,4 +350,28 @@ class ReferenceItem extends ActiveRecord
         return ((int)$max) + self::SORT_STEP;
     }
 
+    /**
+     * Возвращает список элементов для выбора типа.
+     *
+     * @return array<int, string>
+     */
+    public static function getTypeList(): array
+    {
+        $items = [];
+
+        foreach (
+            static::find()
+                ->where(['is_deleted' => false])
+                ->orderBy([
+                    'sort_order' => SORT_ASC,
+                    'name' => SORT_ASC,
+                ])
+                ->all() as $item
+        ) {
+            $items[$item->id] = $item->name;
+        }
+
+        return $items;
+    }
+
 }

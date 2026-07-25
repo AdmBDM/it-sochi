@@ -10,7 +10,7 @@ use yii\data\ActiveDataProvider;
 /**
  * Поиск элементов универсального классификатора.
  */
-class SearchReferenceItem extends ReferenceItem
+class ReferenceItemSearch extends ReferenceItem
 {
     /**
      * @return array[]
