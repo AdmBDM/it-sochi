@@ -56,6 +56,11 @@ class ReferenceItem extends ActiveRecord
             );
         }
 
+        $this->code = mb_strtolower(
+            trim($this->code),
+            'UTF-8'
+        );
+
         return true;
     }
 
