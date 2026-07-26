@@ -12,16 +12,18 @@ use yii\data\ActiveDataProvider;
  */
 class ReferenceItemSearch extends ReferenceItem
 {
+    public bool $showDeleted = false;
+
     /**
      * @return array[]
      */
     public function rules(): array
     {
         return [
-//            [['id', 'parent_id', 'type_id', 'sort_order'], 'integer'],
             [['id', 'parent_id', 'type_id'], 'integer'],
             [['code', 'name', 'description'], 'safe'],
             [['is_active'], 'boolean'],
+            [['showDeleted'], 'boolean'],
         ];
     }
 
@@ -43,8 +45,7 @@ class ReferenceItemSearch extends ReferenceItem
      */
     public function search(array $params = [], ?int $parentId = null): ActiveDataProvider
     {
-        $query = ReferenceItem::find()
-            ->andWhere(['is_deleted' => false]);
+        $query = ReferenceItem::find();
 
         if ($parentId === null) {
             $query->andWhere(['parent_id' => null]);
@@ -63,15 +64,14 @@ class ReferenceItemSearch extends ReferenceItem
 
         $this->load($params);
 
+        if (!$this->showDeleted) {
+            $query->andWhere(['is_deleted' => false]);
+        }
+
         if (!$this->validate()) {
             return $dataProvider;
         }
 
-//        $query->andFilterWhere([
-//            'id' => $this->id,
-//            'type_id' => $this->type_id,
-//            'is_active' => $this->is_active,
-//        ]);
         $query->andFilterWhere([
             'id' => $this->id,
             'parent_id' => $this->parent_id,

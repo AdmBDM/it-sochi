@@ -148,15 +148,24 @@ class ReferenceItem extends ActiveRecord
     /**
      * Возвращает корневые элементы дерева.
      *
+     * @param bool $showDeleted Показывать удалённые элементы.
+     *
      * @return self[]
      */
-    public static function getRootNodes(): array
+    public static function getRootNodes(bool $showDeleted = false): array
     {
-        return static::find()
+        $query = static::find()
             ->where([
                 'parent_id' => null,
+            ]);
+
+        if (!$showDeleted) {
+            $query->andWhere([
                 'is_deleted' => false,
-            ])
+            ]);
+        }
+
+        return $query
             ->orderBy([
                 'sort_order' => SORT_ASC,
                 'name' => SORT_ASC,
@@ -165,19 +174,30 @@ class ReferenceItem extends ActiveRecord
     }
 
     /**
-     * Возвращает дерево элементов, начиная с указанного родителя.
+     * Возвращает элементы дерева, начиная с указанного родителя.
      *
-     * @param int|null $parentId
+     * @param int|null $parentId Идентификатор родительского элемента.
+     * @param bool $showDeleted Показывать удалённые элементы.
      *
      * @return self[]
      */
-    public static function getTree(?int $parentId = null): array
+    public static function getTree(
+        ?int $parentId = null,
+        bool $showDeleted = false
+    ): array
     {
-        return static::find()
+        $query = static::find()
             ->where([
                 'parent_id' => $parentId,
+            ]);
+
+        if (!$showDeleted) {
+            $query->andWhere([
                 'is_deleted' => false,
-            ])
+            ]);
+        }
+
+        return $query
             ->orderBy([
                 'sort_order' => SORT_ASC,
                 'name' => SORT_ASC,
@@ -186,14 +206,21 @@ class ReferenceItem extends ActiveRecord
     }
 
     /**
-     * Возвращает все активные элементы классификатора.
+     * Возвращает элементы классификатора.
+     *
+     * @param bool $showDeleted Показывать удалённые элементы.
      *
      * @return self[]
      */
-    public static function getAllActive(): array
+    public static function getAll(bool $showDeleted = false): array
     {
-        return static::find()
-            ->where(['is_deleted' => false])
+        $query = static::find();
+
+        if (!$showDeleted) {
+            $query->andWhere(['is_deleted' => false]);
+        }
+
+        return $query
             ->orderBy([
                 'sort_order' => SORT_ASC,
                 'name' => SORT_ASC,
@@ -204,13 +231,15 @@ class ReferenceItem extends ActiveRecord
     /**
      * Группирует элементы классификатора по родительскому идентификатору.
      *
+     * @param bool $showDeleted Показывать удалённые элементы.
+     *
      * @return array<int|null, self[]>
      */
-    public static function getGroupedTree(): array
+    public static function getGroupedTree(bool $showDeleted = false): array
     {
         $grouped = [];
 
-        foreach (static::getAllActive() as $item) {
+        foreach (static::getAll($showDeleted) as $item) {
             $grouped[$item->parent_id][] = $item;
         }
 
@@ -252,20 +281,34 @@ class ReferenceItem extends ActiveRecord
      * Возвращает список элементов для выбора родителя.
      *
      * @param int|null $excludeId Исключаемый элемент.
+     * @param bool $showDeleted Показывать удалённые элементы.
      *
      * @return array<int, string>
      */
-    public static function getParentList(?int $excludeId = null): array
+    public static function getParentList(
+        ?int $excludeId = null,
+        bool $showDeleted = false
+    ): array
     {
-        $query = static::find()
-            ->where(['is_deleted' => false])
-            ->orderBy([
-                'sort_order' => SORT_ASC,
-                'name' => SORT_ASC,
+        $query = static::find();
+
+        if (!$showDeleted) {
+            $query->andWhere([
+                'is_deleted' => false,
             ]);
+        }
+
+        $query->orderBy([
+            'sort_order' => SORT_ASC,
+            'name' => SORT_ASC,
+        ]);
 
         if ($excludeId !== null) {
-            $query->andWhere(['<>', 'id', $excludeId]);
+            $query->andWhere([
+                '<>',
+                'id',
+                $excludeId,
+            ]);
         }
 
         $items = [];
@@ -358,21 +401,28 @@ class ReferenceItem extends ActiveRecord
     /**
      * Возвращает список элементов для выбора типа.
      *
+     * @param bool $showDeleted Показывать удалённые элементы.
+     *
      * @return array<int, string>
      */
-    public static function getTypeList(): array
+    public static function getTypeList(bool $showDeleted = false): array
     {
+        $query = static::find();
+
+        if (!$showDeleted) {
+            $query->andWhere([
+                'is_deleted' => false,
+            ]);
+        }
+
+        $query->orderBy([
+            'sort_order' => SORT_ASC,
+            'name' => SORT_ASC,
+        ]);
+
         $items = [];
 
-        foreach (
-            static::find()
-                ->where(['is_deleted' => false])
-                ->orderBy([
-                    'sort_order' => SORT_ASC,
-                    'name' => SORT_ASC,
-                ])
-                ->all() as $item
-        ) {
+        foreach ($query->all() as $item) {
             $items[$item->id] = $item->name;
         }
 

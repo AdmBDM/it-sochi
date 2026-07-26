@@ -7,10 +7,12 @@ namespace backend\controllers;
 use common\controllers\SochiMainController;
 use common\models\ReferenceItem;
 use common\models\search\ReferenceItemSearch;
+use Throwable;
 use Yii;
 use yii\db\Exception;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use yii\web\ServerErrorHttpException;
 
 /**
  * Контроллер управления универсальным классификатором ReferenceItem.
@@ -32,13 +34,31 @@ class ReferenceController extends SochiMainController
         $selectedNode = null;
 
         if ($id !== null) {
-            $selectedNode = ReferenceItem::findOne([
-                'id' => $id,
-                'is_deleted' => false,
-            ]);
+
+            $params = Yii::$app->request->get(
+                'ReferenceItemSearch',
+                []
+            );
+
+            $showDeleted = (bool)($params['showDeleted'] ?? false);
+
+            $query = ReferenceItem::find()
+                ->andWhere([
+                    'id' => $id,
+                ]);
+
+            if (!$showDeleted) {
+                $query->andWhere([
+                    'is_deleted' => false,
+                ]);
+            }
+
+            $selectedNode = $query->one();
 
             if ($selectedNode === null) {
-                throw new NotFoundHttpException('Элемент классификатора не найден.');
+                throw new NotFoundHttpException(
+                    'Элемент классификатора не найден.'
+                );
             }
         }
 
@@ -51,6 +71,7 @@ class ReferenceController extends SochiMainController
         }
 
         $searchModel = new ReferenceItemSearch();
+        $searchModel->load(Yii::$app->request->queryParams);
 
         $dataProvider = $searchModel->search(
             Yii::$app->request->queryParams,
@@ -58,10 +79,10 @@ class ReferenceController extends SochiMainController
         );
 
         // читаем корень дерева
-        $rootNodes = ReferenceItem::getRootNodes();
+        $rootNodes = ReferenceItem::getRootNodes($searchModel->showDeleted);
 
         // читаем сгруппированное дерево
-        $groupedTree = ReferenceItem::getGroupedTree();
+        $groupedTree = ReferenceItem::getGroupedTree($searchModel->showDeleted);
 
         return $this->render('index', [
             'searchModel'  => $searchModel,
@@ -157,6 +178,8 @@ class ReferenceController extends SochiMainController
      * @param int $id
      *
      * @return string|Response
+     * @throws Exception
+     * @throws NotFoundHttpException
      */
     public function actionUpdate(int $id): string|Response
     {
@@ -255,7 +278,9 @@ class ReferenceController extends SochiMainController
      *
      * @return Response
      *
+     * @throws Exception
      * @throws NotFoundHttpException
+     * @throws Throwable
      */
     public function actionMoveUp(int $id): Response
     {
@@ -294,7 +319,7 @@ class ReferenceController extends SochiMainController
 
             $transaction->commit();
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
 
             $transaction->rollBack();
 
@@ -353,7 +378,7 @@ class ReferenceController extends SochiMainController
 
             $transaction->commit();
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
 
             $transaction->rollBack();
 
@@ -379,6 +404,51 @@ class ReferenceController extends SochiMainController
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
+        ]);
+    }
+
+    /**
+     * Восстанавливает ранее логически удалённый элемент классификатора.
+     *
+     * @param int $id Идентификатор восстанавливаемого элемента.
+     *
+     * @return Response
+     * @throws Exception
+     * @throws NotFoundHttpException
+     * @throws ServerErrorHttpException
+     */
+    public function actionRestore(int $id): Response
+    {
+        $model = ReferenceItem::find()
+            ->where([
+                'id' => $id,
+            ])
+            ->one();
+
+        if ($model === null) {
+            throw new NotFoundHttpException(
+                'Элемент классификатора не найден.'
+            );
+        }
+
+        $model->is_deleted = false;
+
+        if (!$model->save(true, ['is_deleted'])) {
+            throw new ServerErrorHttpException(
+                'Не удалось восстановить запись.'
+            );
+        }
+
+        if (Yii::$app->request->isAjax) {
+
+            return $this->asJson([
+                'success' => true,
+            ]);
+        }
+
+        return $this->redirect([
+            'index',
+            'id' => $model->parent_id,
         ]);
     }
 

@@ -23,13 +23,29 @@ if (!$node->hasChildren()) {
     $marker = '▸';
 }
 
+$linkText = sprintf(
+    '%s %s',
+    $marker,
+    Html::encode($node->name)
+);
+
+if ($node->is_deleted) {
+    $linkText = sprintf(
+        '<span class="text-decoration-line-through text-danger">%s</span>',
+        $linkText
+    );
+}
+
 echo Html::a(
-    sprintf(
-        '%s %s',
-        $marker,
-        Html::encode($node->name)
-    ),
-    ['index', 'id' => $node->id],
+    $linkText,
+    [
+        'index',
+        'id' => $node->id,
+        'ReferenceItemSearch' => Yii::$app->request->get(
+            'ReferenceItemSearch',
+            []
+        ),
+    ],
     [
         'class' => sprintf(
             'list-group-item list-group-item-action%s',

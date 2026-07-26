@@ -47,16 +47,31 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'id' => 'btn-update-reference',
                         ]
                 ) ?>
-                <?= Html::a(
-                        'Удалить',
-                        ['delete', 'id' => $selectedNode->id],
-                        [
-                                'class' => 'btn btn-danger',
-                                'id' => 'btn-delete-reference',
-                                'data-name' => $selectedNode->name,
-                        ]
-                ) ?>
+                <?php if ($selectedNode->is_deleted): ?>
 
+                    <?= Html::a(
+                            'Восстановить',
+                            ['restore', 'id' => $selectedNode->id],
+                            [
+                                    'class' => 'btn btn-success',
+                                    'id' => 'btn-restore-reference',
+                                    'data-name' => $selectedNode->name,
+                            ]
+                    ) ?>
+
+                <?php else: ?>
+
+                    <?= Html::a(
+                            'Удалить',
+                            ['delete', 'id' => $selectedNode->id],
+                            [
+                                    'class' => 'btn btn-danger',
+                                    'id' => 'btn-delete-reference',
+                                    'data-name' => $selectedNode->name,
+                            ]
+                    ) ?>
+
+                <?php endif; ?>
             <?php else: ?>
                 <?= Html::button(
                         'Редактировать',
@@ -77,11 +92,34 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
 
-    <div class="alert alert-secondary">
-        <strong>Выбранный узел:</strong>
-        <?= $selectedNode === null
-            ? 'Корневой уровень'
-            : Html::encode($selectedNode->name) ?>
+    <div class="d-flex justify-content-between align-items-center alert alert-secondary">
+
+        <div>
+            <strong>Выбранный узел:</strong>
+            <?= $selectedNode === null
+                    ? 'Корневой уровень'
+                    : Html::encode($selectedNode->name) ?>
+        </div>
+
+        <div>
+            <?= Html::beginForm(['index'], 'get') ?>
+
+            <?= Html::hiddenInput('id', $selectedNode?->id) ?>
+
+            <div class="form-check mb-0">
+                <?= Html::activeCheckbox(
+                        $searchModel,
+                        'showDeleted',
+                        [
+                                'label' => 'Показывать удалённые',
+                                'onchange' => 'this.form.submit()',
+                        ]
+                ) ?>
+            </div>
+
+            <?= Html::endForm() ?>
+        </div>
+
     </div>
 
     <div class="row">
@@ -101,6 +139,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     'dataProvider' => $dataProvider,
                     'filterModel' => $searchModel,
 
+                    'rowOptions' => static function (ReferenceItem $model): array {
+                        if ($model->is_deleted) {
+                            return ['class' => 'table-danger text-decoration-line-through',];
+                        }
+                        return [];
+                    },
                     'columns' => [
                             [
                                     'class' => ActionColumn::class,
@@ -231,6 +275,36 @@ $(document).on('click', '#btn-delete-reference', function (e) {
             if (typeof response === 'object' && response.success) {
 
                 // $.pjax.reload({container: '#reference-grid-pjax'});
+
+                location.reload();
+            }
+
+        }
+
+    });
+
+});
+
+$(document).on('click', '#btn-restore-reference', function (e) {
+
+    e.preventDefault();
+
+    const link = $(this);
+
+    if (!confirm(
+        'Восстановить "' + link.data('name') + '"?'
+    )) {
+        return;
+    }
+
+    $.ajax({
+
+        url: link.attr('href'),
+        type: 'POST',
+
+        success: function (response) {
+
+            if (typeof response === 'object' && response.success) {
 
                 location.reload();
             }
