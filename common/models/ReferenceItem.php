@@ -434,4 +434,152 @@ class ReferenceItem extends ActiveRecord
         return $items;
     }
 
+    /**
+     * Возвращает корневой элемент классификатора.
+     *
+     * @param string $code Код классификатора.
+     *
+     * @return self|null
+     */
+    public static function getRoot(string $code): ?self
+    {
+        return static::find()
+            ->where([
+                'parent_id' => null,
+                'code' => mb_strtolower(trim($code), 'UTF-8'),
+                'is_deleted' => false,
+            ])
+            ->one();
+    }
+
+    /**
+     * Возвращает все элементы указанного классификатора.
+     *
+     * Корневой элемент классификатора в результат не включается.
+     *
+     * @param string $code Код классификатора.
+     * @param bool $showDeleted Показывать удалённые элементы.
+     *
+     * @return self[]
+     */
+    public static function getItems(
+        string $code,
+        bool $showDeleted = false
+    ): array {
+        $root = static::getRoot($code);
+
+        if ($root === null) {
+            return [];
+        }
+
+        $items = [];
+
+        static::collectChildren(
+            $root,
+            $items,
+            $showDeleted
+        );
+
+        return $items;
+    }
+
+    /**
+     * Возвращает плоский список элементов классификатора.
+     *
+     * Используется как универсальная замена методов getList()
+     * существующих справочников.
+     *
+     * @param string $code Код классификатора.
+     * @param bool $showDeleted Показывать удалённые элементы.
+     *
+     * @return array<int,string>
+     */
+    public static function getFlatList(
+        string $code,
+        bool $showDeleted = false
+    ): array {
+        $items = [];
+
+        foreach (static::getItems($code, $showDeleted) as $item) {
+            $items[$item->id] = $item->name;
+        }
+
+        return $items;
+    }
+
+    /**
+     * Рекурсивно собирает дочерние элементы.
+     *
+     * Элементы возвращаются в естественном порядке дерева,
+     * определяемом sort_order.
+     *
+     * @param self $parent Родительский элемент.
+     * @param self[] $items Результирующий массив.
+     * @param bool $showDeleted Показывать удалённые элементы.
+     *
+     * @return void
+     */
+    private static function collectChildren(
+        self $parent,
+        array &$items,
+        bool $showDeleted
+    ): void {
+        $children = static::find()
+            ->where([
+                'parent_id' => $parent->id,
+            ]);
+
+        if (!$showDeleted) {
+            $children->andWhere([
+                'is_deleted' => false,
+            ]);
+        }
+
+        $children = $children
+            ->orderBy([
+                'sort_order' => SORT_ASC,
+                'name' => SORT_ASC,
+            ])
+            ->all();
+
+        foreach ($children as $child) {
+            $items[] = $child;
+
+            static::collectChildren(
+                $child,
+                $items,
+                $showDeleted
+            );
+        }
+    }
+
+    /**
+     * Возвращает непосредственный дочерний элемент по его коду.
+     *
+     * Поиск выполняется только среди прямых потомков текущего элемента.
+     *
+     * @param string $code Код дочернего элемента.
+     * @param bool $showDeleted Учитывать логически удалённые элементы.
+     *
+     * @return self|null
+     */
+    public function getChildByCode(
+        string $code,
+        bool $showDeleted = false
+    ): ?self {
+        $query = static::find()
+            ->where([
+                'parent_id' => $this->id,
+                'code' => mb_strtolower(trim($code), 'UTF-8'),
+            ]);
+
+        if (!$showDeleted) {
+            $query->andWhere([
+                'is_deleted' => false,
+            ]);
+        }
+
+        return $query->one();
+    }
+
 }
