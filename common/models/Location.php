@@ -8,13 +8,13 @@ use yii\db\ActiveRecord;
 
 /**
  * @property int $id
- * @property int $building_id
+ * @property int $building_reference_id
  * @property int|null $floor
  * @property string|null $room
  * @property string $created_at
  * @property string $updated_at
  *
- * @property Building $building
+ * @property ReferenceItem $building
  * @property Workplace[] $workplaces
  */
 class Location extends ActiveRecord
@@ -37,7 +37,9 @@ class Location extends ActiveRecord
             [['building_id', 'floor'], 'integer'],
             [['room'], 'string', 'max' => 50],
             [['created_at', 'updated_at'], 'safe'],
-            [['building_id'], 'exist', 'targetClass' => Building::class, 'targetAttribute' => 'id'],
+            [['building_reference_id'], 'exist',
+                'targetClass' => ReferenceItem::class,
+                'targetAttribute' => 'id'],
         ];
     }
 
@@ -49,6 +51,7 @@ class Location extends ActiveRecord
         return [
             'id' => 'ID',
             'building_id' => 'Здание',
+            'building_reference_id' => 'Здание',
             'floor' => 'Этаж',
             'room' => 'Помещение',
             'created_at' => 'Создано',
@@ -61,7 +64,7 @@ class Location extends ActiveRecord
      */
     public function getBuilding(): ActiveQuery
     {
-        return $this->hasOne(Building::class, ['id' => 'building_id']);
+        return $this->hasOne(ReferenceItem::class, ['id' => 'building_reference_id']);
     }
 
     /**

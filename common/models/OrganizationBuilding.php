@@ -8,11 +8,11 @@ use yii\db\ActiveRecord;
 
 /**
  * @property int $id
- * @property int $organization_id
- * @property int $building_id
+ * @property int $organization_reference_id
+ * @property int $building_reference_id
  *
- * @property Organization $organization
- * @property Building $building
+ * @property ReferenceItem $organization
+ * @property ReferenceItem $building
  */
 class OrganizationBuilding extends ActiveRecord
 {
@@ -30,11 +30,17 @@ class OrganizationBuilding extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['organization_id', 'building_id'], 'required'],
-            [['organization_id', 'building_id'], 'integer'],
-            [['organization_id', 'building_id'], 'unique', 'targetAttribute' => ['organization_id', 'building_id']],
-            [['organization_id'], 'exist', 'targetClass' => Organization::class, 'targetAttribute' => 'id'],
-            [['building_id'], 'exist', 'targetClass' => Building::class, 'targetAttribute' => 'id'],
+            [['organization_reference_id', 'building_reference_id'], 'required'],
+            [['organization_reference_id', 'building_reference_id'], 'integer'],
+            [['organization_reference_id', 'building_reference_id'], 'unique',
+                'targetAttribute' => ['organization_reference_id', 'building_reference_id']],
+            [['organization_reference_id'], 'exist',
+                'targetClass' => ReferenceItem::class,
+                'targetAttribute' => 'id'],
+
+            [['building_reference_id'], 'exist',
+                'targetClass' => ReferenceItem::class,
+                'targetAttribute' => 'id'],
         ];
     }
 
@@ -47,6 +53,8 @@ class OrganizationBuilding extends ActiveRecord
             'id' => 'ID',
             'organization_id' => 'Организация',
             'building_id' => 'Здание',
+            'organization_reference_id' => 'Организация',
+            'building_reference_id' => 'Здание',
         ];
     }
 
@@ -55,7 +63,7 @@ class OrganizationBuilding extends ActiveRecord
      */
     public function getOrganization(): ActiveQuery
     {
-        return $this->hasOne(Organization::class, ['id' => 'organization_id']);
+        return $this->hasOne(ReferenceItem::class, ['id' => 'organization_reference_id']);
     }
 
     /**
@@ -63,6 +71,6 @@ class OrganizationBuilding extends ActiveRecord
      */
     public function getBuilding(): ActiveQuery
     {
-        return $this->hasOne(Building::class, ['id' => 'building_id']);
+        return $this->hasOne(ReferenceItem::class, ['id' => 'building_reference_id']);
     }
 }

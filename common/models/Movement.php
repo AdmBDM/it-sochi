@@ -20,6 +20,8 @@ use yii\db\ActiveRecord;
  * @property Device $device
  * @property Workplace|null $fromWorkplace
  * @property Workplace|null $toWorkplace
+ * @property ReferenceItem|null $oldStatus
+ * @property ReferenceItem|null $newStatus
  * @property User|null $movedByUser
  */
 class Movement extends ActiveRecord
@@ -91,13 +93,15 @@ class Movement extends ActiveRecord
     public function getOldStatus()
     {
 //        return $this->hasOne(DeviceStatus::class, ['id' => 'id_old'])->andWhere(['type_change' => 'status']);
-        return $this->hasOne(DeviceStatus::class, ['id' => 'id_old']);
+//        return $this->hasOne(DeviceStatus::class, ['id' => 'id_old']);
+        return $this->hasOne(ReferenceItem::class, ['id' => 'id_old']);
     }
 
     public function getNewStatus()
     {
 //        return $this->hasOne(DeviceStatus::class, ['id' => 'id_new'])->andWhere(['type_change' => 'status']);
-        return $this->hasOne(DeviceStatus::class, ['id' => 'id_new']);
+//        return $this->hasOne(DeviceStatus::class, ['id' => 'id_new']);
+        return $this->hasOne(ReferenceItem::class, ['id' => 'id_new']);
     }
 
     public function getEmployee()

@@ -61,7 +61,7 @@ class Building extends ActiveRecord
      */
     public function getOrganizationBuildings(): ActiveQuery
     {
-        return $this->hasMany(OrganizationBuilding::class, ['building_id' => 'id']);
+        return $this->hasMany(OrganizationBuilding::class, ['building_reference_id' => 'id']);
     }
 
     /**
@@ -69,6 +69,6 @@ class Building extends ActiveRecord
      */
     public function getLocations(): ActiveQuery
     {
-        return $this->hasMany(Location::class, ['building_id' => 'id']);
+        return $this->hasMany(Location::class, ['building_reference_id' => 'id']);
     }
 }

@@ -13,7 +13,7 @@ use yii\db\ActiveRecord;
  *
  * @property int $id
  * @property int $model_id
- * @property int $status_id
+ * @property int $status_reference_id
  * @property int $workplace_id
  * @property string|null $serial_number
  * @property string|null $inventory_number
@@ -25,7 +25,7 @@ use yii\db\ActiveRecord;
  * @property string $updated_at
  *
  * @property DeviceModel $model
- * @property DeviceStatus $status
+ * @property ReferenceItem $status
  * @property Workplace $workplace
  * @property Movement[] $movements
  * @property DiscoveredPrinter[] $discoveredPrinters
@@ -37,7 +37,7 @@ class Device extends ActiveRecord
      */
     public static function tableName(): string
     {
-        return 'devices';
+        return '{{%devices}}';
     }
 
     /**
@@ -46,13 +46,16 @@ class Device extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['model_id', 'status_id', 'workplace_id'], 'required'],
-            [['model_id', 'status_id', 'workplace_id'], 'integer'],
+            [['model_id', 'status_reference_id', 'workplace_id'], 'required'],
+            [['model_id', 'status_reference_id', 'workplace_id'], 'integer'],
             [['comment', 'printer_metrics'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
             [['serial_number', 'inventory_number', 'name'], 'string', 'max' => 255],
             [['mac_address'], 'string', 'max' => 17],
             [['mac_address'], 'match', 'pattern' => '/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/', 'message' => 'Неверный формат MAC-адреса'],
+            [['status_reference_id'], 'exist',
+                'targetClass' => ReferenceItem::class,
+                'targetAttribute' => 'id'],
         ];
     }
 
@@ -65,6 +68,7 @@ class Device extends ActiveRecord
             'id' => 'ID',
             'model_id' => 'Модель устройства',
             'status_id' => 'Статус',
+            'status_reference_id' => 'Статус',
             'workplace_id' => 'Рабочее место',
             'serial_number' => 'Серийный номер',
             'inventory_number' => 'Инвентарный номер',
@@ -86,7 +90,7 @@ class Device extends ActiveRecord
 
     public function getStatus(): ActiveQuery
     {
-        return $this->hasOne(DeviceStatus::class, ['id' => 'status_id']);
+        return $this->hasOne(ReferenceItem::class, ['id' => 'status_reference_id']);
     }
 
     public function getWorkplace(): ActiveQuery

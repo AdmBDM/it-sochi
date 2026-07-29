@@ -8,14 +8,15 @@ use yii\db\ActiveRecord;
 
 /**
  * @property int $id
- * @property int $brand_id
- * @property int $type_id
+ * @property int $brand_reference_id
+ * @property int $type_reference_id
  * @property string $name
  * @property string $created_at
  * @property string $updated_at
  *
- * @property DeviceBrand $deviceBrand
- * @property DeviceType $deviceType
+ * @property ReferenceItem $brand
+ * @property ReferenceItem $type
+ *
  * @property Device[] $devices
  */
 class DeviceModel extends ActiveRecord
@@ -34,13 +35,13 @@ class DeviceModel extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['brand_id', 'type_id', 'name'], 'required'],
-            [['brand_id', 'type_id'], 'integer'],
+            [['brand_reference_id', 'type_reference_id', 'name'], 'required'],
+            [['brand_reference_id', 'type_reference_id'], 'integer'],
             [['name'], 'string', 'max' => 100],
             [['created_at', 'updated_at'], 'safe'],
-            [['brand_id'], 'exist', 'targetClass' => DeviceBrand::class, 'targetAttribute' => 'id'],
-            [['type_id'], 'exist', 'targetClass' => DeviceType::class, 'targetAttribute' => 'id'],
-            [['type_id', 'name'], 'unique', 'targetAttribute' => ['type_id', 'name'], 'message' => 'Такое сочетание типа и названия уже существует.'],
+            [['brand_reference_id'], 'exist', 'targetClass' => ReferenceItem::class, 'targetAttribute' => 'id'],
+            [['type_reference_id'], 'exist', 'targetClass' => ReferenceItem::class, 'targetAttribute' => 'id'],
+            [['type_reference_id', 'name'], 'unique', 'targetAttribute' => ['type_reference_id', 'name'], 'message' => 'Такое сочетание типа и названия уже существует.'],
         ];
     }
 
@@ -53,6 +54,8 @@ class DeviceModel extends ActiveRecord
             'id' => 'ID',
             'brand_id' => 'Бренд',
             'type_id' => 'Тип устройства',
+            'brand_reference_id' => 'Бренд',
+            'type_reference_id' => 'Тип устройства',
             'name' => 'Модель',
             'created_at' => 'Создано',
             'updated_at' => 'Обновлено',
@@ -64,7 +67,7 @@ class DeviceModel extends ActiveRecord
      */
     public function getBrand(): ActiveQuery
     {
-        return $this->hasOne(DeviceBrand::class, ['id' => 'brand_id']);
+        return $this->hasOne(ReferenceItem::class, ['id' => 'brand_reference_id']);
     }
 
     /**
@@ -72,7 +75,7 @@ class DeviceModel extends ActiveRecord
      */
     public function getType(): ActiveQuery
     {
-        return $this->hasOne(DeviceType::class, ['id' => 'type_id']);
+        return $this->hasOne(ReferenceItem::class, ['id' => 'type_reference_id']);
     }
 
     /**
