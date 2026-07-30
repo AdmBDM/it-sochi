@@ -47,13 +47,22 @@ class ReferenceItem extends ActiveRecord
             return false;
         }
 
+        $parentId = $this->parent_id === ''
+            ? null
+            : (int)$this->parent_id;
+
         if (
             $this->isNewRecord &&
             (!$this->sort_order || $this->sort_order <= 0)
         ) {
-            $this->sort_order = static::getNextSortOrder(
-                $this->parent_id === '' ? null : (int)$this->parent_id
-            );
+            $this->sort_order = static::getNextSortOrder($parentId);
+        }
+
+        if (
+            !$this->isNewRecord &&
+            $this->isAttributeChanged('parent_id', false)
+        ) {
+            $this->sort_order = static::getNextSortOrder($parentId);
         }
 
         $this->code = mb_strtolower(
@@ -151,34 +160,6 @@ class ReferenceItem extends ActiveRecord
     }
 
     /**
-     * Возвращает корневые элементы дерева.
-     *
-     * @param bool $showDeleted Показывать удалённые элементы.
-     *
-     * @return self[]
-     */
-    public static function getRootNodes(bool $showDeleted = false): array
-    {
-        $query = static::find()
-            ->where([
-                'parent_id' => null,
-            ]);
-
-        if (!$showDeleted) {
-            $query->andWhere([
-                'is_deleted' => false,
-            ]);
-        }
-
-        return $query
-            ->orderBy([
-                'sort_order' => SORT_ASC,
-                'name' => SORT_ASC,
-            ])
-            ->all();
-    }
-
-    /**
      * Возвращает элементы дерева, начиная с указанного родителя.
      *
      * @param int|null $parentId Идентификатор родительского элемента.
@@ -191,23 +172,12 @@ class ReferenceItem extends ActiveRecord
         bool $showDeleted = false
     ): array
     {
-        $query = static::find()
-            ->where([
-                'parent_id' => $parentId,
-            ]);
-
-        if (!$showDeleted) {
-            $query->andWhere([
-                'is_deleted' => false,
-            ]);
-        }
-
-        return $query
-            ->orderBy([
-                'sort_order' => SORT_ASC,
-                'name' => SORT_ASC,
-            ])
-            ->all();
+        return static::applyDefaultOrder(
+            static::createBranchQuery(
+                $parentId,
+                $showDeleted
+            )
+        )->all();
     }
 
     /**
@@ -280,6 +250,67 @@ class ReferenceItem extends ActiveRecord
         }
 
         return $path;
+    }
+
+    /**
+     * Возвращает корневой элемент текущей ветки.
+     *
+     * Если текущий элемент уже является корнем,
+     * возвращается он сам.
+     *
+     * @return self
+     */
+    public function getRootItem(): self
+    {
+        $current = $this;
+
+        while ($current->parent !== null) {
+            $current = $current->parent;
+        }
+
+        return $current;
+    }
+
+    /**
+     * Возвращает список родителей текущего элемента.
+     *
+     * Текущий элемент в результат не включается.
+     * Корневой элемент включается первым.
+     *
+     * @return self[]
+     */
+    public function getParents(): array
+    {
+        $parents = $this->getPath();
+
+        array_pop($parents);
+
+        return $parents;
+    }
+
+    /**
+     * Проверяет, является ли текущий элемент потомком указанного.
+     *
+     * Сам элемент потомком самого себя не считается.
+     *
+     * @param self $ancestor Предполагаемый предок.
+     *
+     * @return bool
+     */
+    public function isDescendantOf(self $ancestor): bool
+    {
+        $current = $this->parent;
+
+        while ($current !== null) {
+
+            if ($current->id === $ancestor->id) {
+                return true;
+            }
+
+            $current = $current->parent;
+        }
+
+        return false;
     }
 
     /**
@@ -390,13 +421,7 @@ class ReferenceItem extends ActiveRecord
      */
     public static function getNextSortOrder(?int $parentId): int
     {
-        $query = static::find()->andWhere(['is_deleted' => false,]);
-
-        if ($parentId === null) {
-            $query->andWhere(['parent_id' => null]);
-        } else {
-            $query->andWhere(['parent_id' => $parentId]);
-        }
+        $query = static::createBranchQuery($parentId);
 
         $max = $query->max('sort_order');
 
@@ -472,15 +497,45 @@ class ReferenceItem extends ActiveRecord
             return [];
         }
 
-        $items = [];
+        $items = $root->getBranch($showDeleted);
 
-        static::collectChildren(
-            $root,
-            $items,
-            $showDeleted
-        );
+        array_shift($items);
 
         return $items;
+    }
+
+    /**
+     * Возвращает элемент по пути внутри классификатора.
+     *
+     * Поиск начинается от корневого элемента классификатора,
+     * после чего последовательно выполняется переход
+     * по указанной цепочке кодов.
+     *
+     * Если классификатор либо любой элемент пути отсутствует,
+     * возвращается null.
+     *
+     * @param string $rootCode Код корневого классификатора.
+     * @param string[] $codes Цепочка кодов.
+     * @param bool $showDeleted Показывать удалённые элементы.
+     *
+     * @return self|null
+     */
+    public static function findByPath(
+        string $rootCode,
+        array $codes,
+        bool $showDeleted = false
+    ): ?self
+    {
+        $root = static::getRoot($rootCode);
+
+        if ($root === null) {
+            return null;
+        }
+
+        return $root->getChildByPath(
+            $codes,
+            $showDeleted
+        );
     }
 
     /**
@@ -505,52 +560,6 @@ class ReferenceItem extends ActiveRecord
         }
 
         return $items;
-    }
-
-    /**
-     * Рекурсивно собирает дочерние элементы.
-     *
-     * Элементы возвращаются в естественном порядке дерева,
-     * определяемом sort_order.
-     *
-     * @param self $parent Родительский элемент.
-     * @param self[] $items Результирующий массив.
-     * @param bool $showDeleted Показывать удалённые элементы.
-     *
-     * @return void
-     */
-    private static function collectChildren(
-        self $parent,
-        array &$items,
-        bool $showDeleted
-    ): void {
-        $children = static::find()
-            ->where([
-                'parent_id' => $parent->id,
-            ]);
-
-        if (!$showDeleted) {
-            $children->andWhere([
-                'is_deleted' => false,
-            ]);
-        }
-
-        $children = $children
-            ->orderBy([
-                'sort_order' => SORT_ASC,
-                'name' => SORT_ASC,
-            ])
-            ->all();
-
-        foreach ($children as $child) {
-            $items[] = $child;
-
-            static::collectChildren(
-                $child,
-                $items,
-                $showDeleted
-            );
-        }
     }
 
     /**
@@ -580,6 +589,214 @@ class ReferenceItem extends ActiveRecord
         }
 
         return $query->one();
+    }
+
+    /**
+     * Возвращает потомка по цепочке кодов.
+     *
+     * Каждый следующий код ищется среди непосредственных потомков
+     * предыдущего элемента.
+     *
+     * Если хотя бы один элемент цепочки отсутствует,
+     * возвращается null.
+     *
+     * @param string[] $codes Цепочка кодов.
+     * @param bool $showDeleted Показывать удалённые элементы.
+     *
+     * @return self|null
+     */
+    public function getChildByPath(
+        array $codes,
+        bool $showDeleted = false
+    ): ?self
+    {
+        $current = $this;
+
+        foreach ($codes as $code) {
+
+            $current = $current->getChildByCode(
+                $code,
+                $showDeleted
+            );
+
+            if ($current === null) {
+                return null;
+            }
+        }
+
+        return $current;
+    }
+
+    /**
+     * Возвращает непосредственных потомков текущего элемента.
+     *
+     * В отличие от getBranch() метод не выполняет рекурсивный обход
+     * дерева и возвращает только первый уровень вложенности.
+     *
+     * @param bool $showDeleted Показывать удалённые элементы.
+     *
+     * @return self[]
+     */
+    public function getChildrenItems(
+        bool $showDeleted = false
+    ): array {
+        return static::applyDefaultOrder(
+            static::createBranchQuery(
+                $this->id,
+                $showDeleted
+            )
+        )->all();
+    }
+
+    /**
+     * Возвращает список непосредственных потомков
+     * для использования в выпадающих списках.
+     *
+     * Ключ массива — идентификатор элемента,
+     * значение — его наименование.
+     *
+     * @param bool $showDeleted Показывать удалённые элементы.
+     *
+     * @return array<int,string>
+     */
+    public function getChildrenList(
+        bool $showDeleted = false
+    ): array {
+        $items = [];
+
+        foreach ($this->getChildrenItems($showDeleted) as $item) {
+            $items[$item->id] = $item->name;
+        }
+
+        return $items;
+    }
+
+    /**
+     * Возвращает текущий элемент и всю его подветку.
+     *
+     * Первый элемент массива — текущий объект,
+     * далее следуют все его потомки
+     * в порядке обхода дерева.
+     *
+     * @param bool $showDeleted Показывать удалённые элементы.
+     *
+     * @return self[]
+     */
+    public function getBranch(
+        bool $showDeleted = false
+    ): array {
+        $items = [
+            $this,
+        ];
+
+        foreach ($this->getChildrenItems($showDeleted) as $child) {
+
+            $items = array_merge(
+                $items,
+                $child->getBranch($showDeleted)
+            );
+        }
+
+        return $items;
+    }
+
+    /**
+     * Возвращает плоский список текущего элемента и всей его подветки.
+     *
+     * Ключ массива — идентификатор элемента,
+     * значение — его наименование.
+     *
+     * @param bool $showDeleted Показывать удалённые элементы.
+     *
+     * @return array<int,string>
+     */
+    public function getBranchList(
+        bool $showDeleted = false
+    ): array {
+        $items = [];
+
+        foreach ($this->getBranch($showDeleted) as $item) {
+            $items[$item->id] = $item->name;
+        }
+
+        return $items;
+    }
+
+    /**
+     * Нормализует порядок элементов внутри указанной ветки.
+     *
+     * После выполнения метода значения поля sort_order
+     * принимают последовательность:
+     *
+     * 10, 20, 30, ...
+     *
+     * Нормализация выполняется только для неудалённых элементов.
+     *
+     * @param int|null $parentId
+     *
+     * @return void
+     */
+    public static function normalizeSortOrder(?int $parentId): void
+    {
+        $items = static::applyDefaultOrder(
+            static::createBranchQuery($parentId)
+        )->all();
+
+        $sortOrder = self::SORT_STEP;
+
+        foreach ($items as $item) {
+
+            if ($item->sort_order !== $sortOrder) {
+
+                $item->updateAttributes([
+                    'sort_order' => $sortOrder,
+                ]);
+            }
+
+            $sortOrder += self::SORT_STEP;
+        }
+    }
+
+    /**
+     * Возвращает запрос для элементов указанной ветки.
+     *
+     * @param int|null $parentId
+     * @param bool $showDeleted
+     *
+     * @return ActiveQuery
+     */
+    private static function createBranchQuery(
+        ?int $parentId,
+        bool $showDeleted = false
+    ): ActiveQuery {
+        $query = static::find()
+            ->where([
+                'parent_id' => $parentId,
+            ]);
+
+        if (!$showDeleted) {
+            $query->andWhere([
+                'is_deleted' => false,
+            ]);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Применяет стандартную сортировку классификатора.
+     *
+     * @param ActiveQuery $query
+     *
+     * @return ActiveQuery
+     */
+    private static function applyDefaultOrder(
+        ActiveQuery $query
+    ): ActiveQuery {
+        return $query->orderBy([
+            'sort_order' => SORT_ASC,
+            'name' => SORT_ASC,
+        ]);
     }
 
 }

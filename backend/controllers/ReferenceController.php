@@ -79,7 +79,8 @@ class ReferenceController extends SochiMainController
         );
 
         // читаем корень дерева
-        $rootNodes = ReferenceItem::getRootNodes($searchModel->showDeleted);
+//        $rootNodes = ReferenceItem::getRootNodes($searchModel->showDeleted);
+        $rootNodes = ReferenceItem::getTree(null, $searchModel->showDeleted);
 
         // читаем сгруппированное дерево
         $groupedTree = ReferenceItem::getGroupedTree($searchModel->showDeleted);
@@ -450,6 +451,23 @@ class ReferenceController extends SochiMainController
             'index',
             'id' => $model->parent_id,
         ]);
+    }
+
+    /**
+     * Проверка методов
+     * - getRootItem().
+     *
+     * @param int $id
+     *
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionTestRoot(int $id): string
+    {
+        return sprintf(
+            "Метод для текущих проверок: %s\n",
+            '!'
+        );
     }
 
 }
