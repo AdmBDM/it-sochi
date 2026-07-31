@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use common\models\ReferenceItem;
+use yii\bootstrap5\Modal;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -64,22 +65,81 @@ $this->registerJs(<<<JS
 
 })();
 
+$('#select-parent-button').on('click', function () {
+
+    $('#parent-selector-modal').modal('show');
+
+    $('#parent-selector-content').load(
+        '/admin/reference/parent-selector?' +
+        $.param({
+            selected_id: $('#referenceitem-parent_id').val(),
+            exclude_id: $('#referenceitem-id').val()
+        })
+    );
+
+});
+
+$(document).on(
+    'reference.parent.selected',
+    function (e, id, name) {
+
+        $('#referenceitem-parent_id').val(id);
+
+        $('#referenceitem-parent-name').val(name);
+
+        $('#parent-selector-modal').modal('hide');
+
+    }
+);
+
 JS
 );
 
-
 $form = ActiveForm::begin(['id' => 'reference-form',]);
+
+Modal::begin([
+        'id' => 'parent-selector-modal',
+        'title' => 'Выбор родителя',
+        'size' => Modal::SIZE_DEFAULT,
+]);
+echo '<div id="parent-selector-content" class="bg-light p-3"></div>';
+Modal::end();
+
 ?>
 
 <div class="card">
 
     <div class="card-body">
-        <?= $form->field($model, 'parent_id')->dropDownList(
-                $parentList,
-                [
-                        'prompt' => 'Корневой элемент',
-                ]
-        ) ?>
+        <?= $form->field($model, 'parent_id')->hiddenInput()->label(false) ?>
+
+        <div class="mb-3">
+            <?= Html::label(
+                    'Родительский элемент',
+                    'referenceitem-parent-name',
+                    [
+                            'class' => 'form-label',
+                    ]
+            ) ?>
+
+            <div class="input-group">
+                <?= Html::textInput(
+                        'parent_name',
+                        $model->parent?->name,
+                        [
+                                'id' => 'referenceitem-parent-name',
+                                'class' => 'form-control',
+                                'readonly' => true,
+                                'placeholder' => 'Корневой элемент',
+                        ]
+                ) ?>
+                <button
+                        type="button"
+                        id="select-parent-button"
+                        class="btn btn-outline-secondary">
+                    Выбрать
+                </button>
+            </div>
+        </div>
 
         <?= $form->field($model, 'name')->textInput([
                 'maxlength' => true,

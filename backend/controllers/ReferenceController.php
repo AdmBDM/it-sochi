@@ -340,7 +340,9 @@ class ReferenceController extends SochiMainController
      *
      * @return Response
      *
+     * @throws Exception
      * @throws NotFoundHttpException
+     * @throws Throwable
      */
     public function actionMoveDown(int $id): Response
     {
@@ -454,19 +456,64 @@ class ReferenceController extends SochiMainController
     }
 
     /**
-     * Проверка методов
-     * - getRootItem().
+     * Возвращает модальное окно выбора родительского элемента.
      *
-     * @param int $id
+     * @param int|null $selectedId Идентификатор текущего выбранного родителя.
+     * @param int|null $excludeId Идентификатор элемента, который необходимо исключить
+     *                            из дерева (редактируемый элемент).
      *
      * @return string
      * @throws NotFoundHttpException
      */
+    public function actionParentSelector(
+        ?int $selectedId = null,
+        ?int $excludeId = null
+    ): string
+    {
+        $selectedNode = null;
+
+        if ($selectedId !== null) {
+
+            $selectedNode = ReferenceItem::findOne([
+                'id' => $selectedId,
+            ]);
+
+            if ($selectedNode === null) {
+                throw new NotFoundHttpException(
+                    'Элемент классификатора не найден.'
+                );
+            }
+        }
+
+        $expandedNodes = [];
+
+        if ($selectedNode !== null) {
+
+            foreach ($selectedNode->getPath() as $item) {
+                $expandedNodes[$item->id] = true;
+            }
+        }
+
+        return $this->renderAjax('_parent_tree', [
+            'selectedNode'  => $selectedNode,
+            'groupedTree'   => ReferenceItem::getGroupedTree(),
+            'expandedNodes' => $expandedNodes,
+            'excludeId'     => $excludeId,
+        ]);
+    }
+
+
+    /**
+     * Метод проверки методов
+     * @param int $id
+     *
+     * @return string
+     */
     public function actionTestRoot(int $id): string
     {
         return sprintf(
-            "Метод для текущих проверок: %s\n",
-            '!'
+            "Метод для текущих проверок: %s (%d)\n",
+            '!', $id
         );
     }
 
