@@ -83,7 +83,7 @@ class ReferenceController extends SochiMainController
         $rootNodes = ReferenceItem::getTree(null, $searchModel->showDeleted);
 
         // читаем сгруппированное дерево
-        $groupedTree = ReferenceItem::getGroupedTree($searchModel->showDeleted);
+        $groupedTree = ReferenceItem::getGroupedTree(null, $searchModel->showDeleted);
 
         return $this->render('index', [
             'searchModel'  => $searchModel,
@@ -461,15 +461,19 @@ class ReferenceController extends SochiMainController
      * @param int|null $selectedId Идентификатор текущего выбранного родителя.
      * @param int|null $excludeId Идентификатор элемента, который необходимо исключить
      *                            из дерева (редактируемый элемент).
-     *
+     * @param string $target
+     * @param string|null $rootCode
      * @return string
      * @throws NotFoundHttpException
      */
     public function actionParentSelector(
         ?int $selectedId = null,
-        ?int $excludeId = null
+        ?int $excludeId = null,
+        string $target = 'parent_id',
+        ?string $rootCode = null
     ): string
     {
+
         $selectedNode = null;
 
         if ($selectedId !== null) {
@@ -496,9 +500,11 @@ class ReferenceController extends SochiMainController
 
         return $this->renderAjax('_parent_tree', [
             'selectedNode'  => $selectedNode,
-            'groupedTree'   => ReferenceItem::getGroupedTree(),
+            'groupedTree'   => ReferenceItem::getGroupedTree($rootCode),
             'expandedNodes' => $expandedNodes,
             'excludeId'     => $excludeId,
+            'target'        => $target,
+            'rootCode'      => $rootCode,
         ]);
     }
 

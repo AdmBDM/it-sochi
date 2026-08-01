@@ -210,11 +210,27 @@ class ReferenceItem extends ActiveRecord
      *
      * @return array<int|null, self[]>
      */
-    public static function getGroupedTree(bool $showDeleted = false): array
+    public static function getGroupedTree(
+        ?string $rootCode = null,
+        bool $showDeleted = false
+    ): array
     {
         $grouped = [];
 
-        foreach (static::getAll($showDeleted) as $item) {
+        if ($rootCode === null) {
+            $items = static::getAll($showDeleted);
+
+        } else {
+            $root = static::getRoot($rootCode);
+
+            if ($root === null) {
+                return [];
+            }
+
+            $items = $root->getBranch($showDeleted);
+        }
+
+        foreach ($items as $item) {
             $grouped[$item->parent_id][] = $item;
         }
 

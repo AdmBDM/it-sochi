@@ -144,7 +144,8 @@ $this->params['breadcrumbs'][] = $this->title;
 Modal::begin([
     'id' => 'movement-modal',
     'title' => '<h5>Информация о перемещении</h5>',
-    'size' => Modal::SIZE_LARGE,
+//    'size' => Modal::SIZE_LARGE,
+    'size' => Modal::SIZE_DEFAULT,
 ]);
 echo '<div id="movement-modal-content"></div>';
 Modal::end();

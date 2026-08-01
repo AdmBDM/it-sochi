@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use common\models\ReferenceItem;
+use yii\base\InvalidConfigException;
+use yii\web\JqueryAsset;
 
 /**
  * @var yii\web\View $this
@@ -10,18 +12,33 @@ use common\models\ReferenceItem;
  * @var array<int|null, ReferenceItem[]> $groupedTree
  * @var array<int,bool> $expandedNodes
  * @var int|null $excludeId
+ * @var string $target
+ * @var string|null $rootCode
  */
 
-$this->registerJsFile(
-        '@web/js/reference-parent-tree.js',
-        [
-                'depends' => [
-                        \yii\web\JqueryAsset::class,
-                ],
-        ]
-);
+try {
+    $this->registerJsFile(
+            '@web/js/reference-parent-tree.js',
+            [
+                    'depends' => [
+                            JqueryAsset::class,
+                    ],
+            ]
+    );
+} catch (InvalidConfigException $e) {
 
-$rootNodes = ReferenceItem::getTree();
+}
+
+if ($rootCode === null) {
+    $rootNodes = ReferenceItem::getTree();
+} else {
+
+    $root = ReferenceItem::getRoot($rootCode);
+
+    $rootNodes = $root === null
+            ? []
+            : [$root];
+}
 ?>
 
 <div class="list-group">
@@ -43,6 +60,8 @@ $rootNodes = ReferenceItem::getTree();
                 'groupedTree'   => $groupedTree,
                 'expandedNodes' => $expandedNodes,
                 'excludeId'     => $excludeId,
+                'target'        => $target,
+                'rootCode'      => $rootCode,
             ])
             ?>
 

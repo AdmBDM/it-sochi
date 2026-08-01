@@ -12,6 +12,8 @@ use yii\helpers\Html;
  * @var ReferenceItem|null $selectedNode
  * @var array<int,bool> $expandedNodes
  * @var int|null $excludeId
+ * @var string $target
+ * @var string|null $rootCode
  */
 
 if ($excludeId !== null && $node->id === $excludeId) {return;}
@@ -44,6 +46,7 @@ echo Html::tag(
             'class' => 'tree-label',
             'data-id' => $node->id,
             'data-name' => $node->name,
+            'data-target' => $target,
         ]
     ),
     [
@@ -67,10 +70,12 @@ foreach ($children as $child) {
 
     echo $this->render('_parent_tree_node', [
         'node' => $child,
-        'groupedTree' => $groupedTree,
-        'selectedNode' => $selectedNode,
+        'groupedTree'   => $groupedTree,
+        'selectedNode'  => $selectedNode,
         'expandedNodes' => $expandedNodes,
-        'excludeId' => $excludeId,
+        'excludeId'     => $excludeId,
+        'target'        => $target,
+        'rootCode'      => $rootCode,
     ]);
 }
 

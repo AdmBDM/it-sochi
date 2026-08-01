@@ -65,27 +65,49 @@ $this->registerJs(<<<JS
 
 })();
 
-$('#select-parent-button').on('click', function () {
+function openReferenceSelector(options) {
 
     $('#parent-selector-modal').modal('show');
 
     $('#parent-selector-content').load(
         '/admin/reference/parent-selector?' +
         $.param({
-            selected_id: $('#referenceitem-parent_id').val(),
-            exclude_id: $('#referenceitem-id').val()
+            target: options.target,
+            selected_id: $(options.selectedSelector).val(),
+            exclude_id: $('#referenceitem-id').val(),
+            rootCode: options.rootCode
         })
     );
+
+}
+
+$('#select-parent-button').on('click', function () {
+
+    openReferenceSelector({
+        target: 'parent_id',
+        selectedSelector: '#referenceitem-parent_id',
+        rootCode: null
+    });
+    
+});
+
+$('#select-type-button').on('click', function () {
+
+    openReferenceSelector({
+        target: 'type_id',
+        selectedSelector: '#referenceitem-type_id',
+        rootCode: 'type_object'
+    });
 
 });
 
 $(document).on(
-    'reference.parent.selected',
-    function (e, id, name) {
+    'reference.item.selected',
+    function (e, target, id, name) {
 
-        $('#referenceitem-parent_id').val(id);
+        $('#referenceitem-' + target).val(id);
 
-        $('#referenceitem-parent-name').val(name);
+        $('#referenceitem-' + target + '-name').val(name);
 
         $('#parent-selector-modal').modal('hide');
 
@@ -100,7 +122,7 @@ $form = ActiveForm::begin(['id' => 'reference-form',]);
 Modal::begin([
         'id' => 'parent-selector-modal',
         'title' => 'Выбор родителя',
-        'size' => Modal::SIZE_DEFAULT,
+        'size' => Modal::SIZE_LARGE,
 ]);
 echo '<div id="parent-selector-content" class="bg-light p-3"></div>';
 Modal::end();
@@ -115,7 +137,7 @@ Modal::end();
         <div class="mb-3">
             <?= Html::label(
                     'Родительский элемент',
-                    'referenceitem-parent-name',
+                    'referenceitem-parent_id-name',
                     [
                             'class' => 'form-label',
                     ]
@@ -126,7 +148,7 @@ Modal::end();
                         'parent_name',
                         $model->parent?->name,
                         [
-                                'id' => 'referenceitem-parent-name',
+                                'id' => 'referenceitem-parent_id-name',
                                 'class' => 'form-control',
                                 'readonly' => true,
                                 'placeholder' => 'Корневой элемент',
@@ -153,7 +175,38 @@ Modal::end();
                 'id' => 'referenceitem-code',
         ]) ?>
 
-        <?= $form->field($model, 'type_id')->dropDownList($typeList, ['prompt' => 'Не указан',]) ?>
+        <?= $form->field($model, 'type_id')->hiddenInput()->label(false) ?>
+
+        <div class="mb-3">
+            <?= Html::label(
+                    'Тип',
+                    'referenceitem-type_id-name',
+                    [
+                            'class' => 'form-label',
+                    ]
+            ) ?>
+
+            <div class="input-group">
+                <?= Html::textInput(
+                        'type_name',
+                        $model->type?->name,
+                        [
+                                'id' => 'referenceitem-type_id-name',
+                                'class' => 'form-control',
+                                'readonly' => true,
+                                'placeholder' => 'Не указан',
+                        ]
+                ) ?>
+
+                <button
+                        type="button"
+                        id="select-type-button"
+                        class="btn btn-outline-secondary">
+                    Выбрать
+                </button>
+            </div>
+        </div>
+
         <?= $form->field($model, 'description')->textarea(['rows' => 4,]) ?>
 <!--        --><?php //= $form->field($model, 'sort_order')->input('number') ?>
         <?= $form->field($model, 'is_active')->checkbox() ?>

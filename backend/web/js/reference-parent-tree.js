@@ -34,18 +34,19 @@ $(document).on(
     '.tree-label',
     function (e) {
 
-            e.preventDefault();
-            e.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
 
-            const label = $(this);
+        const label = $(this);
 
-            $(document).trigger(
-                'reference.parent.selected',
-                [
-                        label.data('id'),
-                        label.data('name')
-                ]
-            );
+        $(document).trigger(
+            'reference.item.selected',
+            [
+                label.data('target'),
+                label.data('id'),
+                label.data('name')
+            ]
+        );
 
     }
 );
