@@ -5,6 +5,10 @@
 
 # phpstorm project files
 .idea
+# IDE
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/shelf/
 
 # netbeans project files
 nbproject
@@ -13,6 +17,15 @@ nbproject
 .buildpath
 .project
 .settings
+
+# Node.js
+node_modules/
+
+# npm
+npm-debug.log*
+
+# Build cache
+.esbuild/
 
 # windows thumbnail cache
 Thumbs.db

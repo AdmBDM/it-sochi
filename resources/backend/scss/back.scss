@@ -1,0 +1,10 @@
+@use 'variables' as *;
+@use 'mixins';
+@use 'modal';
+
+body {
+  background-color: $main-background;
+  font-family: $main-font-family;
+  margin: 0;
+  padding: 0
+}

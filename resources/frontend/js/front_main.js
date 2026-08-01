@@ -1,0 +1,18 @@
+function toggleMobileMenu() {
+    document.querySelector(".main-nav").classList.toggle("active")
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    var e = document.querySelector(".mobile-menu-btn");
+    e && e.addEventListener("click", toggleMobileMenu)
+});
+
+class SimpleSlider {
+    constructor(e) {
+        this.container = document.querySelector(e), this.container && this.init()
+    }
+
+    init() {
+        console.log("Slider initialized")
+    }
+}
