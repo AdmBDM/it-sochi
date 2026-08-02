@@ -466,7 +466,7 @@ class ReferenceController extends SochiMainController
      * @return string
      * @throws NotFoundHttpException
      */
-    public function actionParentSelector(
+    public function actionSelector(
         ?int $selectedId = null,
         ?int $excludeId = null,
         string $target = 'parent_id',
@@ -498,7 +498,7 @@ class ReferenceController extends SochiMainController
             }
         }
 
-        return $this->renderAjax('_parent_tree', [
+        return $this->renderAjax('_selector_tree', [
             'selectedNode'  => $selectedNode,
             'groupedTree'   => ReferenceItem::getGroupedTree($rootCode),
             'expandedNodes' => $expandedNodes,

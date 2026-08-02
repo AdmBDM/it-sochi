@@ -1,0 +1,29 @@
+@use 'variables' as *;
+
+/* --------------------------------------------------------------------------
+ * Modal stack
+ * -------------------------------------------------------------------------- */
+
+.modal-stack-under {
+  opacity: $modal-stack-under-opacity;
+  filter: brightness($modal-stack-under-brightness);
+  transition: $modal-stack-transition;
+}
+
+.modal-stack-top {
+
+  .modal-content {
+    box-shadow: $modal-stack-top-shadow;
+    transition: $modal-stack-transition;
+  }
+
+  .modal-header {
+    background-color: $modal-stack-header-bg;
+    color: $modal-stack-header-color;
+    transition: $modal-stack-transition;
+  }
+
+  .btn-close {
+    filter: invert(1);
+  }
+}

@@ -68,7 +68,7 @@ echo Html::beginTag('div', [
 
 foreach ($children as $child) {
 
-    echo $this->render('_parent_tree_node', [
+    echo $this->render('_selector_tree_node', [
         'node' => $child,
         'groupedTree'   => $groupedTree,
         'selectedNode'  => $selectedNode,

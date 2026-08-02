@@ -1,2 +1,18 @@
 $main-font-family: "Segoe UI", sans-serif;
 $main-background: #f9f9f9;
+
+/* --------------------------------------------------------------------------
+ * Modal stack
+ * -------------------------------------------------------------------------- */
+
+$modal-stack-transition: .2s ease-in-out;
+
+$modal-stack-under-opacity: .75;
+$modal-stack-under-brightness: .9;
+
+$modal-stack-top-shadow:
+        0 .75rem 2rem rgba(0, 0, 0, .35);
+
+$modal-stack-header-bg: var(--bs-primary);
+$modal-stack-header-color: var(--bs-white);
+

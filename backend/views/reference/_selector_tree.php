@@ -3,8 +3,6 @@
 declare(strict_types=1);
 
 use common\models\ReferenceItem;
-use yii\base\InvalidConfigException;
-use yii\web\JqueryAsset;
 
 /**
  * @var yii\web\View $this
@@ -15,19 +13,6 @@ use yii\web\JqueryAsset;
  * @var string $target
  * @var string|null $rootCode
  */
-
-try {
-    $this->registerJsFile(
-            '@web/js/reference-parent-tree.js',
-            [
-                    'depends' => [
-                            JqueryAsset::class,
-                    ],
-            ]
-    );
-} catch (InvalidConfigException $e) {
-
-}
 
 if ($rootCode === null) {
     $rootNodes = ReferenceItem::getTree();
@@ -54,7 +39,7 @@ if ($rootCode === null) {
         <?php foreach ($rootNodes as $node): ?>
 
             <?=
-            $this->render('_parent_tree_node', [
+            $this->render('_selector_tree_node', [
                 'node'          => $node,
                 'selectedNode'  => $selectedNode,
                 'groupedTree'   => $groupedTree,
