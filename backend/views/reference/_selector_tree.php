@@ -12,6 +12,7 @@ use common\models\ReferenceItem;
  * @var int|null $excludeId
  * @var string $target
  * @var string|null $rootCode
+ * @var string $title
  */
 
 if ($rootCode === null) {

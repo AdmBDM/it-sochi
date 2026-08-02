@@ -5,9 +5,11 @@
  * -------------------------------------------------------------------------- */
 
 .modal-stack-under {
-  opacity: $modal-stack-under-opacity;
-  filter: brightness($modal-stack-under-brightness);
-  transition: $modal-stack-transition;
+  .modal-content {
+    opacity: $modal-stack-under-opacity;
+    filter: brightness($modal-stack-under-brightness);
+    transition: $modal-stack-transition;
+  }
 }
 
 .modal-stack-top {
@@ -26,4 +28,23 @@
   .btn-close {
     filter: invert(1);
   }
+}
+
+/* --------------------------------------------------------------------------
+ * Reference selector tree
+ * -------------------------------------------------------------------------- */
+.me-1 {
+  margin-right: 0.3rem !important;
+  font-size: x-large;
+  line-height: 0.5;
+}
+
+.tree-marker,
+.tree-label {
+  cursor: pointer;
+}
+
+.tree-marker:hover,
+.tree-label:hover {
+  color: var(--bs-primary);
 }

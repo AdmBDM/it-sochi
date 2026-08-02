@@ -50,7 +50,8 @@
             button: '#select-parent-button',
             target: 'parent_id',
             selectedSelector: '#referenceitem-parent_id',
-            displaySelector: '#referenceitem-parent_id-name'
+            displaySelector: '#referenceitem-parent_id-name',
+            title: 'Выбор родительского элемента'
         },
 
         type: {
@@ -58,7 +59,8 @@
             target: 'type_id',
             selectedSelector: '#referenceitem-type_id',
             displaySelector: '#referenceitem-type_id-name',
-            rootCode: 'type_object'
+            rootCode: 'type_object',
+            title: 'Выбор типа'
         }
     };
 
@@ -68,12 +70,12 @@
     }
 
     function getSelectorModal() {
-        return $('#parent-selector-modal');
+        return $('#reference-selector-modal');
     }
 
     $(document).on(
         'show.bs.modal',
-        '#parent-selector-modal',
+        '#reference-selector-modal',
         function () {
 
             getFormModal().addClass('modal-stack-under');
@@ -84,7 +86,7 @@
 
     $(document).on(
         'hidden.bs.modal',
-        '#parent-selector-modal',
+        '#reference-selector-modal',
         function () {
 
             getFormModal().removeClass('modal-stack-under');
@@ -95,19 +97,25 @@
 
     function openReferenceSelector(options) {
         currentSelector = options;
+
+        getSelectorModal()
+            .find('.modal-title')
+            .text(options.title);
+
         getSelectorModal().modal('show');
 
         const params = {
             target: options.target,
             selected_id: $(options.selectedSelector).val(),
-            exclude_id: $('#referenceitem-id').val()
+            exclude_id: $('#referenceitem-id').val(),
+            title: options.title
         };
 
         if (options.rootCode !== undefined) {
             params.rootCode = options.rootCode;
         }
 
-        $('#parent-selector-content').load(
+        $('#reference-selector-content').load(
             '/admin/reference/selector?' + $.param(params)
         );
     }

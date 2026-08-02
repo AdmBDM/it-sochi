@@ -16,13 +16,13 @@ use yii\widgets\ActiveForm;
 
 $form = ActiveForm::begin(['id' => 'reference-form',]);
 
-Modal::begin([
-        'id' => 'parent-selector-modal',
-        'title' => 'Выбор родителя',
-        'size' => Modal::SIZE_LARGE,
-]);
-echo '<div id="parent-selector-content" class="bg-light p-3"></div>';
-Modal::end();
+//Modal::begin([
+//        'id' => 'reference-selector-modal',
+//        'title' => '',
+//        'size' => Modal::SIZE_LARGE,
+//]);
+//echo '<div id="reference-selector-content" class="bg-light p-3"></div>';
+//Modal::end();
 
 ?>
 

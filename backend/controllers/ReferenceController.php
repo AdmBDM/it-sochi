@@ -470,7 +470,8 @@ class ReferenceController extends SochiMainController
         ?int $selectedId = null,
         ?int $excludeId = null,
         string $target = 'parent_id',
-        ?string $rootCode = null
+        ?string $rootCode = null,
+        string $title = 'Выбор элемента'
     ): string
     {
 
@@ -505,6 +506,7 @@ class ReferenceController extends SochiMainController
             'excludeId'     => $excludeId,
             'target'        => $target,
             'rootCode'      => $rootCode,
+            'title'         => $title,
         ]);
     }
 

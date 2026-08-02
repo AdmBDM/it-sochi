@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use common\models\ReferenceItem;
 use common\models\search\ReferenceItemSearch;
+use yii\bootstrap5\Modal;
 use yii\data\ActiveDataProvider;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
@@ -233,6 +234,15 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 </div>
 
+<?php
+Modal::begin([
+        'id' => 'reference-selector-modal',
+        'title' => '',
+        'size' => Modal::SIZE_LARGE,
+]);
+echo '<div id="reference-selector-content" class="bg-light p-3"></div>';
+Modal::end();
+?>
 
 <?php
 $this->registerJs(<<<JS
