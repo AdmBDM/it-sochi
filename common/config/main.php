@@ -49,5 +49,6 @@ return [
             'enableStrictParsing' => false,
             'rules' => require(__DIR__ . '/rules/backend-rules.php'),
         ],
+        'trassirDb' => require __DIR__ . '/trassir-db.php',
     ],
 ];

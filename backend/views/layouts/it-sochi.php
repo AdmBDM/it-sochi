@@ -46,6 +46,9 @@ $this->registerCssFile('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font
             ['label' => 'Сотрудники', 'url' => ['/employee/index']],
             ['label' => 'Техника', 'url' => ['/device/index']],
             ['label' => 'Workplace', 'url' => ['/workplace/index']],
+            Yii::$app->user->identity?->username === 'Jim7'
+                ? ['label' => 'TRASSIR', 'url' => ['/trassir/event/index']]
+                : '',
             Yii::$app->user->isGuest
                 ? ['label' => 'Войти', 'url' => ['/site/login']]
                 : '<li class="nav-item">'

@@ -515,14 +515,23 @@ class ReferenceController extends SochiMainController
      * Метод проверки методов
      * @param int $id
      *
-     * @return string
      */
-    public function actionTestRoot(int $id): string
+    public function actionTestRoot(int $id = 1)
     {
         return sprintf(
             "Метод для текущих проверок: %s (%d)\n",
             '!', $id
         );
+
+//        $value = Yii::$app->trassirDb
+//            ->createCommand('SELECT current_database(), current_user')
+//            ->queryOne();
+//
+//        myDebug($value);
+//
+//        myDebug(\common\models\trassir\EventLog::find()->limit(1)->asArray()->one());
+//
+//        myDebug(\common\models\trassir\PacsEvent::find()->limit(1)->asArray()->one());
     }
 
 }

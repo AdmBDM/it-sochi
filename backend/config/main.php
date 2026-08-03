@@ -19,7 +19,13 @@ return [
             Yii::$app->user->loginUrl = null;
         }
     },
+    'modules' => [
+        // ...
 
+        'trassir' => [
+            'class' => backend\modules\trassir\Module::class,
+        ],
+    ],
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-backend',
