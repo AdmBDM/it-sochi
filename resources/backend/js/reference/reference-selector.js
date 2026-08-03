@@ -1,13 +1,5 @@
 (function () {
-
     let codeChanged = false;
-
-    const nameField = $('#referenceitem-name');
-    const codeField = $('#referenceitem-code');
-
-    codeField.on('input', function () {
-        codeChanged = true;
-    });
 
     function transliterate(text) {
 
@@ -33,17 +25,43 @@
             .replace(/^_+|_+$/g, '');
     }
 
-    nameField.on('input', function () {
+    function initTransliterate() {
 
-        if (codeChanged) {
+        let codeChanged = false;
+
+        const nameField = $('#referenceitem-name');
+        const codeField = $('#referenceitem-code');
+
+        if (!nameField.length || !codeField.length) {
             return;
         }
 
-        codeField.val(
-            transliterate($(this).val())
-        );
+        codeField.off('.transliterate');
+        nameField.off('.transliterate');
 
-    });
+        codeField.on('input.transliterate', function () {
+            codeChanged = true;
+        });
+
+        nameField.on('input.transliterate', function () {
+
+            if (codeChanged) {
+                return;
+            }
+
+            codeField.val(
+                transliterate($(this).val())
+            );
+
+        });
+
+    }
+
+    function initReferenceForm() {
+
+        initTransliterate();
+
+    }
 
     const selectorConfig = {
         parent: {
@@ -139,5 +157,7 @@
             getSelectorModal().modal('hide');
         }
     );
+
+    window.initReferenceForm = initReferenceForm;
 
 })();

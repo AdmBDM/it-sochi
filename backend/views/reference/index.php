@@ -251,6 +251,7 @@ $(document).on('click', '#btn-create-reference', function (e) {
     e.preventDefault();
 
     $('#reference-modal .modal-content').load($(this).attr('href'), function () {
+        window.initReferenceForm();
         $('#reference-modal').modal('show');
     });
 });
@@ -259,6 +260,7 @@ $(document).on('click', '#btn-update-reference', function (e) {
     e.preventDefault();
 
     $('#reference-modal .modal-content').load($(this).attr('href'), function () {
+        window.initReferenceForm();
         $('#reference-modal').modal('show');
     });
 });
